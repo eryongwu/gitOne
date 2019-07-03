@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.eryong.dao.InBcManagerDao">
+  <resultMap type="InBuyContract" id="InBuyContractResult">
+  		<id property="inbcId" column="inbcId"/>
+  		<result property="inbcCode" column="inbcCode"/>
+  		<result property="inbcName" column="inbcName"/>
+  		<result property="insiId" column="insiId"/>
+  		<result property="userId" column="userId"/>
+  		<result property="userName" column="userName"/>  		
+  		<result property="inbcDate" column="inbcDate"/>
+  		<result property="inbcContent" column="inbcContent"/>
+  		<result property="inbcTotalPrice" column="inbcTotalPrice"/>
+  		<result property="inbcOfferPrice" column="inbcOfferPrice"/>
+  		<result property="inbcActualPrice" column="inbcActualPrice"/>
+  		<result property="inbcAdvanceMoney" column="inbcAdvanceMoney"/>
+  		<result property="inbcCeliveryDate" column="inbcCeliveryDate"/>
+  		<result property="inbcDeliveryAddress" column="inbcDeliveryAddress"/>
+  		<result property="inbcState" column="inbcState"/>
+  		<result property="inbcPayState" column="inbcPayState"/>
+  		<result property="inbcBillState" column="inbcBillState"/>
+  		<result property="inbcRemark" column="inbcRemark"/>
+  		<result property="state" column="state"/>
+  		<result property="inbcDelflag" column="inbcDelflag"/>
+  		<result property="optId" column="optId"/>
+  		<result property="currDate" column="currDate"/>
+  	
+  		<collection property="inBuyContractDetail" column="inbcId" ofType="InBuyContractDetail"
+  		select="com.eryong.dao.InBcManagerDaoDetail.getBcManagerDetailById"></collection>  		
+  </resultMap>
+  <!-- 查询数据字典  -->
+  <select id="findAllBcManager"  resultMap="InBuyContractResult" parameterType="PageBean">    
+   	SELECT
+	   	 inbcId,
+	   	 inbcCode,
+	   	 inbcName,
+	   	 insiId,
+	   	 userId,
+	   	 userName,
+	   	 inbcDate,
+	   	 inbcContent,
+	   	 inbcTotalPrice,
+	   	 inbcOfferPrice,
+	   	 inbcActualPrice,
+	   	 inbcAdvanceMoney,
+	   	 inbcCeliveryDate,
+	   	 inbcDeliveryAddress,
+	   	 inbcState,
+	   	 inbcPayState,
+	   	 inbcBillState,
+	   	 inbcRemark,
+	   	 state,
+	   	 inbcDelflag,
+	   	 optId,
+	   	 currDate  	  
+   	FROM 
+   	   t_erp_inbuycontract 
+   	WHERE 
+	   inbcDelflag=0
+	   order by currDate desc
+	   limit #{start},#{rows}
+  </select>
+  
+  <select id="getinbcIdMax" resultType="Integer">
+  SELECT MAX(inbcId) FROM t_erp_inbuycontract
+  </select>
+  
+ <insert id="addBcManager" parameterType="InBuyContract">
+	  	insert into
+	  	 t_erp_inbuycontract
+	  	  (inbcCode,
+	   	  inbcName,
+	   	  insiId,
+	   	  userId,
+	   	  userName,
+	   	  inbcDate,
+	   	  inbcContent,
+	   	  inbcTotalPrice,
+	   	  inbcState,
+	   	  inbcRemark,
+	   	  state,
+	   	  inbcDelflag,
+	   	  optId,
+	   	  inbcCeliveryDate,
+	   	  currDate ,
+	   	  inbcPayState  	  
+	  	 )
+	  	 values
+	  	 (#{inbcCode},
+	   	  #{inbcName},
+	   	  #{insiId},
+	   	  #{userId},
+	   	  #{userName},
+	   	  #{inbcDate},
+   	      #{inbcContent},
+  	      #{inbcTotalPrice},
+  	      #{inbcState},
+	   	  #{inbcRemark},
+	   	  #{state},
+	   	  0,
+	   	  #{optId},
+	   	  #{inbcCeliveryDate},
+	   	  #{currDate},
+	   	  #{inbcPayState}
+	   	    
+	  	 )
+  
+  </insert>
+   
+  
+ <!--  修改子表前查询
+  <select id="updateSelectWorkBook"  resultMap="WorkBookReslut" parameterType="Integer">    
+   	SELECT
+   	 wBId,
+   	 wBName,
+   	 wBDelFlag,
+   	 wBRemark,
+   	 currentTime,
+   	 optId,
+   	 wBState   	  
+   	FROM 
+   	 t_erp_workbook 
+   	WHERE 
+	 wBDelFlag=0
+	and
+	 wBId=#{wBId}	
+  </select>
+  
+  修改主表信息
+  <update id="updateWorkBookById"  parameterType="WorkBook">
+  	update
+  		t_erp_workbook
+  	set
+  		wBName=#{wBName},   	 	
+   	 	wBRemark=#{wBRemark}
+    where
+    	wBId=#{wBId}
+  </update> -->
+  
+  <!-- 删除 -->
+  <update id="deleteBcManagerById" parameterType="Integer">
+  	update    
+  		t_erp_inbuycontract
+  	set 
+  		inbcDelflag=1
+  	where 
+  		inbcId=#{inbcId}
+  </update>
+ 
+  
+  
+  
+</mapper>

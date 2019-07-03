@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>用户管理</title>
+<link rel="stylesheet" type="text/css"
+	href="../jquery-easyui-1.6.6/themes/default/easyui.css" />
+<link rel="stylesheet" type="text/css"
+	href="../jquery-easyui-1.6.6/themes/icon.css" />
+<script type="text/javascript"
+	src="../jquery-easyui-1.6.6/jquery.min.js"></script>
+<script type="text/javascript"
+	src="../jquery-easyui-1.6.6/jquery.easyui.min.js"></script>
+<script type="text/javascript"
+	src="../jquery-easyui-1.6.6/locale/easyui-lang-zh_CN.js"></script>
+
+<script type="text/javascript">
+
+ 	 $.extend($.fn.validatebox.defaults.rules, {
+	    isBlank: {
+	        validator: function (value, param) {
+	        	  return (value.indexOf(" ")<0)   
+	        	},
+	        message: "不能输入空格，请重新输入"
+	    }
+	}); 
+	
+	var addUrl="../inGoodSunit/addSunit.do";
+	var updateUrl="../inGoodSunit/updateSunit.do";
+	var curUrl="";
+	function searchSunit() {
+		var s_inguName = $("#s_inguName").val();
+		$("#dg").datagrid("load", {
+			s_inguName : s_inguName
+		});
+	}
+
+	function openSunitAddDialog() {
+		$("#fm").form("clear");
+		$("#dlg").dialog("open").dialog("setTitle", "添加物品单位");
+		$("#inguName").removeAttr("disabled","disabled");
+		curUrl=addUrl;
+	}
+
+	function closeSunitAddDialog() {
+		$("#fm").form("clear");
+		$("#dlg").dialog("close");
+	}
+	
+	function saveSunit(){
+		$("#fm").form("submit",{
+			url:curUrl,
+			onSubmit:function(){
+				var isValid = $(this).form('validate');
+				if(!isValid){
+					$.messager.alert("提示信息","请输入合法数据！","warning");
+					return false;
+				}else{
+					return true;
+				}
+			},
+			success:function(data){
+				 var result=eval('('+data+')'); 
+				if(result.msg){
+					$("#fm").form("clear");
+					$("#dlg").dialog("close");
+					$.messager.alert("提示信息","保存成功！","info");
+					$("#dg").datagrid("reload");
+				}else{
+					$.messager.alert("提示信息","系统繁忙！","info");
+				}
+			}
+		});
+		curUrl="";
+	}
+	$(function(){
+		$("#inguName").blur(function(){
+			var inguName=$("#inguName").val();
+			$.ajax({
+				url:"../inGoodSunit/findInguNameIsExist.do",
+				type:"post",
+				data:{inguName:inguName},
+				dataType:"json",
+				success:function(data){
+					if(data.msg){
+						$.messager.alert("提示信息","该物品单位名<font color='red'>"+inguName+"</font>已存在！","warning");
+						$("#inguName").val("");
+						return false;
+					}
+				}
+			});
+		});
+	});
+	
+	function openSunitModifyDialog(){
+		var rows=$("#dg").datagrid("getSelections");
+		if(rows.length!=1){
+			$.messager.alert("提示信息","请选择<font color='red' size='6'>1条</font>需要修改的数据！","warning");
+			return false;
+		}
+		
+		$("#dlg").dialog("open").dialog("setTitle","修改用户单位信息中....");
+		$("#fm").form("load",rows[0]);
+		$("#inguName").attr("disabled","disabled");
+		curUrl=updateUrl;
+	}
+	
+	function openSunitDeleteDialog(){
+		var rows=$("#dg").datagrid("getSelections");
+		if(rows.length<1){
+			$.messager.alert("提示信息","请选择需要删除的数据！","warning");
+			return false;
+		}
+		
+		var delIs=[];
+		$.each(rows,function(index,row){
+			delIs.push(row.inguId);
+		});
+		var str=delIs.join(",");
+		
+		$.messager.confirm("提示信息","您确认要删除<font color='red'>"+delIs.length+"</font>条数据吗？",function(r){
+			if(r){
+				$.ajax({
+					url:"../inGoodSunit/deleteInGoodSunitById.do",
+					type:"post",
+					dataType:"json",
+					data:{str:str},
+					success:function(data){
+						if(data.msg){
+							$.messager.alert("提示信息","您已成功删除<font color='red'>"+data.count+"</font>条数据！","info");
+							$("#dg").datagrid("reload");
+						}else{
+							$.messager.alert("提示信息","删除失败！","warning");
+						}
+					},
+					error:function(){
+						$.messager.alert("提示信息","系统繁忙，请稍候再操作！","warning");
+					}
+				});
+			}
+		});
+	} 
+	
+</script>
+</head>
+<body style="margin: 1px;">
+	<table id="dg" title="物品单位" class="easyui-datagrid" fitColumns="true"
+		pagination="true" rownumbers="true" url="../inGoodSunit/findAllSunit.do"
+		fit="true" toolbar="#tb">
+		<thead>
+			<tr>
+				<th field="cb" checkbox="true" align="center"></th>
+				<th field="inguId" width="50" align="center">编号</th>
+				<th field="inguCode" width="50" align="center">物品单位编码</th>
+				<th field="inguName" width="50" align="center">物品单位名称</th>
+				<th field="inguSpell" width="50" align="center" >简拼</th>
+				<th field="inguState" width="50" align="center">物品单位状态</th>
+				<th field="inguRremark" width="50" align="center">备注</th>
+				<th field="currDate" width="50" align="center">创建时间</th>
+				<th field="optName" width="50" align="center">操作人</th>
+			</tr>
+		</thead>
+	</table>
+	<div id="tb">
+		<div>
+			<a onclick="openSunitAddDialog()" class="easyui-linkbutton"
+				iconCls="icon-add" plain="true">添加</a> <a
+				 onclick="openSunitModifyDialog()" class="easyui-linkbutton"
+				iconCls="icon-edit" plain="true">修改</a> <a
+				 onclick="openSunitDeleteDialog()" class="easyui-linkbutton"
+				iconCls="icon-remove" plain="true">删除</a>
+		</div>
+		<div>
+			&nbsp;物品单位名：&nbsp;<input type="text" name="s_inguName" id="s_inguName"
+				size="20" onkeydown="if(event.keyCode==13) searchSunit()" />&nbsp;
+			<a href="javascript:searchSunit()" class="easyui-linkbutton"
+				iconCls="icon-search" plain="true">搜索</a>
+		</div>
+	</div>
+
+	<div id="dlg" class="easyui-dialog"
+		style="width: 570px; height: 350px; padding: 10px 20px" closed="true"
+		buttons="#dlg-buttons" modal="true">
+		<form id="fm" method="post">
+			<table cellspacing="5px">
+				<p>
+					<input type="hidden" id="inguId" name="inguId" />
+				</p>
+				<tr>
+					<td>物品单位名：</td>
+					<td><input type="text" id="inguName" name="inguName"
+						class="easyui-validatebox" required="true" validType="isBlank"/></td>
+					<td>&nbsp;&nbsp;&nbsp;&nbsp;</td>
+					<td>简拼：</td>
+					<td><input type="text" id="inguSpell" name="inguSpell"
+						class="easyui-validatebox" required="true" validType="isBlank" /></td>
+				</tr>
+				<tr>
+					<td>备注：</td>
+					<td colspan="4"><textarea rows="7" cols="50"
+							name="inguRremark" id="inguRremark"></textarea></td>
+				</tr>
+			</table>
+		</form>
+	</div>
+
+	<div id="dlg-buttons">
+		<a href="javascript:saveSunit()" class="easyui-linkbutton"
+			iconCls="icon-ok">保存</a> <a href="javascript: closeSunitAddDialog()"
+			class="easyui-linkbutton" iconCls="icon-cancel">关闭</a>
+	</div>
+</body>
+
+</html>

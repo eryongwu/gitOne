@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.eryong.dao.IngoodsproducerDao">
+	<resultMap type="InGoodsProducer" id="inGoodsProducerResult">
+		<id property="ingpId" column="ingpId" />
+		<result property="ingpCode" column="ingpCode" />
+		<result property="ingpName" column="ingpName" />
+		<result property="ingpSpell" column="ingpSpell" />
+		<result property="ingpState" column="ingpState" />
+		<result property="ingpDelflag" column="ingpDelflag" />
+		<result property="ingpRemark" column="ingpRemark" />
+		<result property="currDate" column="currDate" />
+		<result property="optid" column="optid" />
+		<result property="ingpLinkMan" column="ingpLinkMan" />
+		<result property="ingpPhone" column="ingpPhone" />
+		<result property="ingpAddress" column="ingpAddress" />
+		<result property="optName" column="optName" />
+	</resultMap>
+	<!-- 查询所有未删除品牌 -->
+	<select id="findAllBrads" parameterType="Map" resultMap="inGoodsProducerResult">
+		SELECT
+		ti.ingpId,
+		ti.ingpCode,
+		ti.ingpName,
+		ti.ingpSpell,
+		ti.ingpState,
+		ti.ingpDelflag,
+		ti.ingpRemark,
+		ti.currDate,
+		ti.optid,
+		ti.ingpLinkMan,
+		ti.ingpPhone,
+		ti.ingpAddress,
+		tu.userName optName
+		FROM
+		t_erp_ingoodsproducer ti
+		LEFT JOIN
+		t_erp_user tu
+		ON
+		ti.optid=tu.userId
+		WHERE
+		ti.ingpDelflag=0
+		<if test="s_ingpName != null">
+			and ti.ingpName like '%${s_ingpName}%'
+		</if>
+		order by ti.currDate desc
+		limit #{pageBean.start},#{pageBean.rows}
+	</select>
+
+	<!-- 查询所有未删除品牌的行数 -->
+	<select id="findAllBradsCount" parameterType="Map" resultType="Integer">
+		select
+		count(*)
+		from
+		t_erp_ingoodsproducer
+		where
+		ingpDelflag=0
+		<if test="s_ingpName != null">
+			and ingpName like '%${s_ingpName}%'
+		</if>
+	</select>
+
+	<!-- 增加品牌 -->
+	<insert id="addBrands" parameterType="InGoodsProducer">
+		insert into
+		t_erp_ingoodsproducer
+		(ingpCode,
+		ingpName,
+		ingpSpell,
+		ingpLinkMan,
+		ingpPhone,
+		ingpAddress,
+		ingpRemark,
+		ingpDelflag,
+		ingpState,
+		optid,
+		currDate)
+		values
+		(#{ingpCode},
+		#{ingpName},
+		#{ingpSpell},
+		#{ingpLinkMan},
+		#{ingpPhone},
+		#{ingpAddress},
+		#{ingpRemark},
+		#{ingpDelflag},
+		#{ingpState},
+		#{optid},
+		#{currDate})
+	</insert>
+
+	<!-- 更改品牌信息 -->
+	<update id="updateBands" parameterType="InGoodsProducer">
+		update
+		t_erp_ingoodsproducer
+		set
+		ingpCode=#{ingpCode},
+		ingpName=#{ingpName},
+		ingpSpell=#{ingpSpell},
+		ingpLinkMan=#{ingpLinkMan},
+		ingpPhone=#{ingpPhone},
+		ingpAddress=#{ingpAddress}
+		where
+		ingpId = #{ingpId}
+	</update>
+
+	<!-- 删除品牌信息 -->
+	<update id="deleteBrands" parameterType="Integer">
+		update
+		t_erp_ingoodsproducer
+		set
+		ingpDelflag= 1
+		where
+		ingpId = #{ingpId}
+	</update>
+
+
+
+
+</mapper>

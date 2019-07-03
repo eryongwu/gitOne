@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.eryong.dao.InGoodsCategoryDao">
+
+    <resultMap type="InGoodsCategory" id="IngoodscategoryMap">
+            <id property="ingcId"  column="ingcId"/>
+            <result property="ingcCode"  column="ingcCode"/>
+            <result property="ingcName"  column="ingcName"/>
+            <result property="ingcSpell"  column="ingcSpell"/>
+            <result property="ingcRemark"  column="ingcRemark"/>
+            <result property="ingcState"  column="ingcState"/>
+            <result property="ingcDelflag"  column="ingcDelflag"/>
+            <result property="optId"  column="optId"/>
+            <result property="currDate"  column="currDate"/>
+    </resultMap>
+
+     <select id="findAllGoods" parameterType="Map" resultMap="IngoodscategoryMap">
+         select
+                 tei.ingcId,
+                 tei.ingcCode,
+                 tei.ingcName,
+                 tei.ingcSpell,
+                 tei.ingcRemark,
+                 tei.ingcState,
+                 tei.ingcDelflag,
+                 tei.optId,
+                 tei.currDate,
+                 teu.userName optName
+          from      t_erp_ingoodscategory tei
+          left join t_erp_user  teu
+          on        tei.optId=teu.userId
+          where     tei.ingcDelflag=0
+          
+        <if test="s_ingcName!=null">
+             and  tei.ingcName like '%${s_ingcName}%'
+        </if>
+          order by tei.currDate desc
+          limit #{pageBean.start},#{pageBean.rows}
+     </select>
+     <!--查询用户总条数  -->
+     <select id="findAllGoodsCount" resultType="Integer">
+          select 
+                 count(*)
+          from   t_erp_ingoodscategory
+          where  ingcDelflag=0
+          <if test="s_ingcName!=null">
+           and ingcName like '%{s_ingcName}%'
+          </if>
+     </select>
+    
+     <insert id="addGoodsCategory" parameterType="InGoodsCategory" >
+          insert 
+          into  t_erp_ingoodscategory
+	           (ingcId,
+	           ingcCode,
+	           ingcName,
+	           ingcRemark,
+	           ingcSpell,
+	           ingcState,
+	           ingcDelflag,
+	           optId,
+	           currDate)
+           values(
+	           #{ingcId},
+	           #{ingcCode},
+	           #{ingcName},
+	           #{ingcRemark},
+	           #{ingcSpell},
+	           #{ingcState},
+	           #{ingcDelflag},
+	           #{optId},
+	           #{currDate})
+     </insert>
+     
+     <select id="findGoodsNameExist" parameterType="String" resultType="Integer">
+            select count(ingcName) from t_erp_ingoodscategory 
+             where  ingcDelflag=0 and ingcName=#{ingcName}
+     </select>
+     
+     <update id="updateRoleInfo" parameterType="InGoodsCategory" >
+         update t_erp_ingoodscategory
+         set
+            ingcCode=#{ingcCode},
+            ingcName=#{ingcName},
+            ingcRemark=#{ingcRemark}
+         where
+            ingcId=#{ingcId}
+     </update>
+     
+     <update id="deleteGoodsById" parameterType="Integer" >
+            update t_erp_ingoodscategory
+            set    ingcDelflag=1
+            where  ingcId=#{ingcId}
+     </update>
+     
+
+  
+     
+</mapper> 

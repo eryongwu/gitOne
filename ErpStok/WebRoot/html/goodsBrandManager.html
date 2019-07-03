@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title></title>
+	
+    <meta name="keywords" content="keyword1,keyword2,keyword3">
+    <meta name="description" content="this is my page">
+    <meta name="content-type" content="text/html; charset=UTF-8">
+    
+    <!--<link rel="stylesheet" type="text/css" href="./styles.css">-->
+<!--引入easyui全部样式-->
+		<link rel="stylesheet" type="text/css" href="../jquery-easyui-1.6.6/themes/default/easyui.css"  />
+		<!--引入图标-->
+		<link rel="stylesheet" type="text/css" href="../jquery-easyui-1.6.6/themes/icon.css" />
+		<!--导入jquery核心库-->
+		<script type="text/javascript" src="../jquery-easyui-1.6.6/jquery.min.js"></script>
+		<!--导入easyui核心库-->
+		<script type="text/javascript" src="../jquery-easyui-1.6.6/jquery.easyui.min.js"></script>
+		<!--导入汉库-->
+		<script type="text/javascript" src="../jquery-easyui-1.6.6/locale/easyui-lang-zh_CN.js" ></script>
+		<script type="text/javascript">
+		
+		var path = "";
+		
+		//jquery自定义验证规则空格不能通过验证
+		 $.extend($.fn.validatebox.defaults.rules,{
+            isBlank: {
+                validator: function (value, param) { 
+                	//去空格 return $.trim(value) != ""
+                	return (value.indexOf(" ")<0)//不能有空格
+                	},
+                message: "不能为空,请重新输入"
+            }
+        });
+		
+		
+		//模糊查询
+			function searchBrands(){				
+				var s_ingpName = $("#s_ingpName").val();
+								
+				$("#dg").datagrid("load",{
+					s_ingpName:s_ingpName,
+				});
+			}
+			
+			//添加打开表单
+			function openBrandAddDialog(){
+				$("#dlg").dialog("open").dialog("setTitle","添加商品品牌信息");
+				$("#fm").removeAttr("disabled","disabled");
+				path = "../ingoodsproducer/addBrands.do";
+			}
+			
+			
+			
+			//光标移除验证用品牌是否重复
+			$(function(){				
+				$("#brandName").blur(function(){
+					var isValid = $(this).val();					
+					if(!!isValid){
+						var brandName = $(this).val();
+						$.ajax({
+							url:path,
+							type:"post",
+							dataType:"json",
+							data:{
+								brandNameVild:brandName
+							},
+					
+					
+							success:function(data){
+								if(data.msg>0){
+									$.messager.alert("提示","品牌<font color='red' size='6'>"+userName+"</font>已经存在","warning");
+									$("#brandName").val("");
+								}
+							}
+						});
+					}else{
+						$.messager.alert("提示","不能有空格","warning");
+						return false;
+					}
+					
+					
+				});
+				
+			});
+			
+			//点击确定提交数据添加/修改
+			function saveBrands(){
+				$("#fm").form("submit",{
+					url:path,
+					onSubmit:function(){
+						var isValid = $(this).form("validate");							
+						if(isValid){
+							return true;
+						}else{
+							$.messager.alert("错误提醒","请正确输入数据","warning");
+							return false;
+						}
+					},
+					success:function(data){
+						var result=eval('('+data+')');						
+						if(result.msg>0){
+							$("#fm").form("clear");														
+							$("#dlg").dialog("close");
+							$.messager.alert("提示信息","添加成功","info");
+							$("#dg").datagrid("reload");
+							path = "";
+						}else{
+							$.messager.alert("提示信息","系统繁忙11","warning");
+						}
+						
+					},
+					error:function(){
+						$.messager.alert("提示信息","系统繁忙","warning");
+					}
+					
+				});							
+			}
+			
+			//点击取消关闭对话框并清空对话框
+			function closeBrandsAddDialog(){
+				
+				$("#dlg").dialog("close");
+				$("#fm").form("clear");
+			}
+		
+			
+			//角色列表模糊查询
+			function searchRole(){
+				openRoleChooseDialog();
+			}		
+			//修改品牌数据回显
+			function openBrandsModifyDialog(){
+				
+				var arryUserInfo = $("#dg").datagrid("getSelections");
+				if(arryUserInfo.length !== 1){
+					$.messager.alert("提示","请选择一个品牌修改","warning");
+				}else{
+					$("#dlg").dialog("open").dialog("setTitle","修改品牌");
+					path = "../ingoodsproducer/updateBands.do";
+					var userInfo = arryUserInfo[0];
+					$("#fm").form("load",userInfo);
+					/* $("#brandName").attr("disabled","disabled"); */
+					
+				}
+			}
+			//删除品牌
+			function openBrandsDeleteDialog(){
+				
+				var rows = $("#dg").datagrid("getSelections");
+				var ids = [];				
+				if(rows.length == 0){
+					$.messager.alert("提示信息","请选择要删除的品牌","warning");										
+				}else{
+					$.each(rows,function(index,row){
+						
+						ids.push(row.ingpId);
+					});
+					
+					var str = ids.join(",");
+					var length = rows.length;
+					$.messager.confirm("提示信息","确定要删除<font color='red' size='6'>"+length+"</font>名品牌？",function(r){ 
+						if(r){
+							$.ajax({
+								url:"../ingoodsproducer/deleteBrands.do",
+								type:"post",
+								dataType:"json",
+								data:{
+									str:str
+								},
+								success:function(data){
+									if(data.msg != 0){
+										var count = data.msg;
+										$.messager.alert("提示","成功删除<font color='red' size='6'>"+count+"</font>名品牌","info");										
+										$("#dg").datagrid("reload");
+									}else{
+										$.messager.alert("提示","系统繁忙","info");
+									}
+								},
+								error:function(){
+									$.messager.alert("提示","系统繁忙。。。","info");
+								}
+							});
+						}else{
+							return false;
+						}
+					});	
+					
+				}
+				
+				
+			}
+			
+		</script>
+  </head>
+  <body style="margin: 1px;">
+   <!-- 添加品牌弹窗 -->
+   <div id="dlg" class="easyui-dialog" style="width: 570px;height: 350px;padding: 10px 20px" closed="true" buttons="#dlg-buttons">
+	 <form id="fm" method="post">	     
+		<table cellspacing="5px">
+			<p><input type="hidden" id="ingpId" name="ingpId" /></p>			
+			<tr>
+			     <td>物品生产商编码：</td>
+			     <td><input type="text" id="ingpCode" name="ingpCode" class="easyui-validatebox" required="true" validType="isBlank"/></td>
+			</tr>
+			<tr>
+				<td>物品生产商名称：</td>				
+				<td><input type="text" id="brandName" name="brandName" class="easyui-validatebox" required="true" validType="isBlank"/></td>				
+			</tr>
+			<tr><td>简拼：</td>
+			     <td><input type="text" id="ingpSpell" name="ingpSpell" class="easyui-validatebox" required="true" validType="isBlank"/></td>			     
+			</tr>
+			<tr>
+			     <td>物品生产商联系人：</td>
+			     <td><input type="text" id="ingpLinkMan" name="ingpLinkMan" class="easyui-validatebox" required="true" validType="isBlank"/></td>
+			 </tr>
+			     
+			<tr><td>物品生产商联系电话：</td>
+			     <td><input type="text" id="ingpPhone" name="ingpPhone" class="easyui-validatebox" required="true" validType="isBlank"/></td>
+			</tr>
+			<tr>
+				 <td>物品生产商地址：</td>
+			     <td><input type="text" id="ingpAddress" name="ingpAddress" class="easyui-validatebox" required="true" validType="isBlank"/></td>
+				
+			</tr>
+			
+			
+		</table>
+	 </form>	
+	</div>
+	<!-- 添加品牌弹窗按钮 -->
+	<div id="dlg-buttons">
+	      <a href="javascript:saveBrands()" class="easyui-linkbutton" iconCls="icon-ok">保存</a>
+	      <a href="javascript:closeBrandsAddDialog()" class="easyui-linkbutton" iconCls="icon-cancel">关闭</a>
+	</div> 
+
+	</div>
+	
+	
+	
+  	  <!-- 品牌展示列表 -->
+      <table id="dg" title="品牌管理" class="easyui-datagrid" fitColumns="true" pagination="true" rownumbers="true" url="../ingoodsproducer/findAllBrads.do" 	fit="true" toolbar="#tb">
+		    <thead>
+			    <tr>
+					<th field="cb" checkbox="true" align="center"></th>
+					<th field="ingpId" width="50" align="center">物品生产商</th>
+					<th field="ingpCode" width="50" align="center">物品生产商编码</th>
+					<th field="ingpName" width="50" align="center">物品生产商名称</th>
+					<th field="ingpSpell" width="50" align="center" hidden="true">简拼</th>
+					<th field="ingpLinkMan" width="50" align="center">物品生产商联系人</th>
+					<th field="ingpPhone" width="50" align="center">物品生产商联系电话</th>
+					<th field="ingpAddress" width="50" align="center">物品生产商地址</th>
+					<th field="optName" width="50" align="center">操作人</th>
+					<th field="currDate" width="50" align="center">创建时间</th>
+				</tr>
+	  		</thead>	
+	   </table>
+	<!-- 品牌管理页面菜单栏 -->
+    <div id="tb">
+		<div>
+			<a href="javascript:openBrandAddDialog()" class="easyui-linkbutton" iconCls="icon-add" plain="true">添加</a>
+			<a href="javascript:openBrandsModifyDialog()" class="easyui-linkbutton" iconCls="icon-edit" plain="true">修改</a>
+			<a href="javascript:openBrandsDeleteDialog()" class="easyui-linkbutton" iconCls="icon-remove" plain="true">删除</a>
+	    </div>
+	    <div>&nbsp;品牌名：&nbsp;<input type="text" name="s_ingpName" id="s_ingpName" size="20" onkeydown="if(event.keyCode==13) searchUser()"/>&nbsp;
+			<a href="javascript:searchBrands()" class="easyui-linkbutton" iconCls="icon-search" plain="true">搜索</a>
+		</div>
+	</div>
+	
+ </body>	
+</html>

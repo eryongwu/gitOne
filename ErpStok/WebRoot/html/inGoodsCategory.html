@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html>
+ <head>
+    <title>物品类别页面</title>
+	
+    <meta name="keywords" content="keyword1,keyword2,keyword3">
+    <meta name="description" content="this is my page">
+    <meta name="content-type" content="text/html; charset=UTF-8">
+    <link rel="stylesheet" type="text/css" href="../jquery-easyui-1.6.6/themes/default/easyui.css"  />
+		<!--引入图标-->
+		<link rel="stylesheet" type="text/css" href="../jquery-easyui-1.6.6/themes/icon.css" />
+		<!--导入jquery核心库-->
+		<script type="text/javascript" src="../jquery-easyui-1.6.6/jquery.min.js"></script>
+		<!--导入easyui核心库-->
+		<script type="text/javascript" src="../jquery-easyui-1.6.6/jquery.easyui.min.js"></script>
+		<!--导入汉库-->
+		<script type="text/javascript" src="../jquery-easyui-1.6.6/locale/easyui-lang-zh_CN.js" ></script>
+	
+	    <script>
+		    function searchGoods(){
+		      var s_ingcName=$("#s_ingcName").val();
+		      $("#dg").datagrid("load",{
+		          s_ingcName:s_ingcName
+		      })
+		    }
+		    
+	       var addUrl="../inGoodsCategory/addGoodsCategory.do";
+           var updateUrl="../inGoodsCategory/updateGoodsCategory.do";
+           var curUrl="";
+	        function openGoodsAddDialog(){
+				$("#dlg").dialog("open").dialog("setTitle","添加物品信息");
+				$("#ingcName").removeAttr("disabled","disabled");
+				curUrl=addUrl;
+		   }
+		   function closeGoodsAddDialog(){
+		        $("#fm").form("clear");
+		        $("#dlg").dialog("close");
+		  }
+	          function saveGoods(){
+	            $("#fm").form("submit",{
+	               url:curUrl,
+	               onSubmit:function(){
+	              	 return $(this).form('validate');
+	                },
+	               success:function(data){
+	                 var result=eval("("+data+")");
+	                 if(result.msg){
+	                     $("#fm").form("clear");
+	                     $("#dlg").dialog("close");
+	                     $.messager.alert("提示信息","保存成功","info");
+	                     $("#dg").datagrid("reload");
+	                 }else{
+	                     $.messager.alert("提示信息","系统繁忙","info");
+	                 }
+	             }
+	             })
+	               curUrl="";
+	          }
+          $(function(){
+	          $("#ingcName").blur(function(){
+	             var ingcName=$("#ingcName").val();
+	             $.ajax({
+	                url:"../inGoodsCategory/findGoodsNameExist.do",
+	                type:"post",
+	                data:{ingcName:ingcName},
+	                dataType:"json",
+	                success:function(data){
+	                   if(data.msg){
+	                      $.messager.alert("提示信息","该<font color='red'>"+ingcName+"</font>已存在","info");
+	                      $("#ingcName").val("");
+	                      return false;
+	                   }
+	                }	             
+	             })
+	          })
+          })
+          //修改
+            function  openGoodsModifyDialog(){
+			var selectedRows=$("#dg").datagrid("getSelections");
+			if(selectedRows.length!=1){
+				$.messager.alert("系统提示","请选择一条要编辑的数据！");
+				return false;
+			}
+			var row=selectedRows[0];
+			$("#dlg").dialog("open").dialog("setTitle","修改物品信息");
+			$("#fm").form("load",row);
+			curUrl=updateUrl;
+	     }
+	        function closeGoodsAddDialog(){
+		        $("#fm").form("clear");
+		        $("#dlg").dialog("close");
+		  }
+            function saveGoods(){
+	            $("#fm").form("submit",{
+	               url:curUrl,
+	               onSubmit:function(){
+	              	 return  $(this).form('validate');
+	               },
+	               success:function(data){
+	                   var result=eval("("+data+")");
+	                   if(result.msg){
+	                       $("#fm").form("clear");
+	                       $("#dlg").dialog("close");
+	                       $.messager.alert("提示信息","修改成功","info");
+	                       $("#dg").datagrid("reload");
+	                   }else{
+	                       $.messager.alert("提示信息","系统繁忙","info");
+	                   }
+	               }
+	             })
+	               curUrl="";
+          }
+         
+         //删除
+         function openGoodsDeleteDialog(){
+	           var rows=$("#dg").datagrid("getSelections");
+	           if(rows.length<1){
+	             $.messager.alert("系统提示","请选择要删除的数据","warning");
+	             return false;
+	           }
+	           var dels=[];
+	           $.each(rows,function(index,row){
+	             dels.push(row.ingcId);
+	           })
+	           var str=dels.join(",");
+	           $.messager.confirm("系统提示","你确认要删除<font color='red'>"+dels.length+"</font>数据",function(r){
+	              if(r){
+	                $.ajax({
+	                   url:"../inGoodsCategory/deleteGoodsById.do",
+	                   Type:"post",
+	                   dataType:"json",
+	                   data:{str:str},
+	                   success:function(data){
+	                      if(data.msg){
+	                         $.messager.alert("系统提示","您删除了"+data.count+"条数据","info");
+	                         $("#dg").datagrid("reload");
+	                      }else{
+	                         $.messager.alert("系统提示","系统繁忙","warning");
+	                      }                  
+	                   },
+	                   error:function(){
+	                        $.messager.alert("系统提示","系统繁忙","warning");
+	                   }
+	                });
+	              }
+	           });
+         }
+	    
+	    </script>
+ </head>
+  
+  <body style="margin: 1px;">
+   <!-- 添加物品类别弹窗 -->
+   <div id="dlg" class="easyui-dialog" style="width: 570px;height: 350px;padding: 10px 20px" closed="true" buttons="#dlg-buttons">
+	 <form id="fm" method="post" action="../inGoodsCategory/">	     
+		<table >
+			<p><input type="hidden" id="ingcId" name="ingcId" /></p>			
+			<tr> <td>物品类别名：</td>
+			     <td><input type="text" id="ingcName" name="ingcName" class="easyui-validatebox" required="true" validType="isBlank"/></td>
+			     <td>&nbsp;&nbsp;&nbsp;&nbsp;</td>
+			     <td>物品编码：</td>
+			     <td><input type="text" id="ingcCode" name="ingcCode" class="easyui-validatebox" required="true" validType="isBlank"/></td>
+			</tr>
+			<tr><td>备注：</td><td colspan="4">
+			    <textarea rows="7" cols="50" name="ingcRemark" id="ingcRemark"></textarea></td>
+			</tr>
+		</table>
+	 </form>	
+	</div>
+	<!-- 添加用户弹窗按钮 -->
+	<div id="dlg-buttons">
+	      <a href="javascript:saveGoods()" class="easyui-linkbutton" iconCls="icon-ok">保存</a>
+	      <a href="javascript:closeGoodsAddDialog()" class="easyui-linkbutton" iconCls="icon-cancel">关闭</a>
+	</div> 
+	
+ 	  <!-- 物品类别展示列表 -->
+    
+     <table id="dg" title="物品类别" class="easyui-datagrid" fitColumns="true" pagination="true" rownumbers="true" url="../inGoodsCategory/findAllGoods.do" 	fit="true" toolbar="#tb">
+	    <thead>
+		    <tr>
+		    
+		            <th field="cb" checkbox="true" align="center"></th>
+		            <th field="ingcId" width="50" align="center"></th>
+				    <th field="ingcCode" width="50" align="center" >物品类别编码</th>
+			        <th field="ingcName" width="100" align="center">物品类别名称</th>			        
+			        <th field="ingcState" width="100" align="center">状态</th>
+			        <th field="optName" width="100" align="center">操作人</th>			        
+			        <th field="currDate" width="50" align="center">业务发生时间</th>
+			</tr>
+  		</thead>	
+   </table>
+	<!-- 物品类别管理页面菜单栏 -->
+    <div id="tb">
+		<div>
+			<a href="javascript:openGoodsAddDialog()" class="easyui-linkbutton" iconCls="icon-add" plain="true">添加</a>
+			<a href="javascript:openGoodsModifyDialog()" class="easyui-linkbutton" iconCls="icon-edit" plain="true">修改</a>
+			<a href="javascript:openGoodsDeleteDialog()" class="easyui-linkbutton" iconCls="icon-remove" plain="true">删除</a>
+	    </div>
+	    <div>
+	         物品类别名称：&nbsp;<input type="text" name="s_ingcName" id="s_ingcName" size="20" onkeydown="if(event.keyCode==13) searchGoods()"/>&nbsp;
+		         <a href="javascript:searchGoods()" class="easyui-linkbutton" iconCls="icon-search" plain="true">搜索</a>
+	    </div>
+	</div>
+	
+	
+	  
+ </body>	
+</html>

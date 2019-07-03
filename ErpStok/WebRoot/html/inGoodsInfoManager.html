@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>inGoodsInfoManager.html</title>
+
+<meta name="keywords" content="keyword1,keyword2,keyword3">
+<meta name="description" content="this is my page">
+<meta name="content-type" content="text/html; charset=UTF-8">
+
+<!--<link rel="stylesheet" type="text/css" href="./styles.css">-->
+<!--引入easyui全部样式-->
+<link rel="stylesheet" type="text/css"
+	href="../jquery-easyui-1.6.6/themes/default/easyui.css" />
+<!--引入图标-->
+<link rel="stylesheet" type="text/css"
+	href="../jquery-easyui-1.6.6/themes/icon.css" />
+<!--导入jquery核心库-->
+<script type="text/javascript"
+	src="../jquery-easyui-1.6.6/jquery.min.js"></script>
+<!--导入easyui核心库-->
+<script type="text/javascript"
+	src="../jquery-easyui-1.6.6/jquery.easyui.min.js"></script>
+<!--导入汉库-->
+<script type="text/javascript"
+	src="../jquery-easyui-1.6.6/locale/easyui-lang-zh_CN.js"></script>
+<script type="text/javascript">
+	var path = "";
+
+	//jquery自定义验证规则空格不能通过验证
+	$.extend($.fn.validatebox.defaults.rules, {
+		isBlank : {
+			validator : function(value, param) {
+				//去空格 return $.trim(value) != ""
+				return (value.indexOf(" ") < 0)//不能有空格
+			},
+			message : "不能为空,请重新输入"
+		}
+	});
+
+
+	//模糊查询
+	function searchUser() {
+		var s_ingiCode = $("#s_ingiCode").val();
+		var s_ingiName = $("#s_ingiName").val();
+		var s_ingtid = $("#s_ingtid").val();
+		var ingiToxic = $("#ingiToxic").val();
+		
+		$("#dg").datagrid("load", {
+			s_ingiCode : s_ingiCode,
+			s_ingiName : s_ingiName,
+			s_ingtid : s_ingtid,
+			ingiToxic:ingiToxic
+			
+		});
+					
+		
+	}
+
+	//添加打开表单
+	function openUserAddDialog() {
+		$("#dlg").dialog("open").dialog("setTitle", "添加物品信息");
+		$("#fm").removeAttr("disabled", "disabled");
+		path = "../InGoodsInfo/addInGoodsInfo.do";
+	}
+
+	//光标移除验证物品编码是否重复		
+	$(function() {
+		$("#ingiCode").blur(
+				function() {
+					var ingiCode = $("#ingiCode").val();
+
+					$.ajax({
+						url : "../InGoodsInfo/selectInGoodsInfoByingiCode.do",
+						type : "post",
+						data : {
+							ingiCode : ingiCode
+						},
+						dataType : "json",
+						success : function(data) {
+							if (data.msg) {
+								$.messager.alert("系统提示",
+										"该物品信息管理<font color='red'>" + ingiCode
+												+ "</font>已存在!", "warning");
+								$("#ingiCode").val("");
+							}
+						}
+					});
+				});
+	});
+
+//光标移除验证物品名称是否重复		
+	$(function() {
+		$("#ingiName").blur(
+				function() {
+					var ingiName = $("#ingiName").val();
+
+					$.ajax({
+						url : "../InGoodsInfo/selectInGoodsInfoByingiName.do",
+						type : "post",
+						data : {
+							ingiName : ingiName
+						},
+						dataType : "json",
+						success : function(data) {
+							if (data.msg) {
+								$.messager.alert("系统提示",
+										"该物品信息管理<font color='red'>" + ingiName
+												+ "</font>已存在!", "warning");
+								$("#ingiName").val("");
+							}
+						}
+					});
+				});
+	});
+	//点击确定提交数据添加/修改
+	function saveUser() {
+		$("#fm").form("submit", {
+			url : path,
+			onSubmit : function() {
+				var isValid = $(this).form("validate");
+				if (isValid) {
+					return true;
+				} else {
+					$.messager.alert("错误提醒", "请正确输入数据", "warning");
+					return false;
+				}
+			},
+			success : function(data) {
+
+				var result = eval('(' + data + ')')
+				if (result.msg > 0) {
+					$("#dlg").dialog("close");
+					$("#fm").form("clear");
+					$.messager.alert("提示信息", "操作成功", "info");
+					$("#dg").datagrid("reload");
+					url = "";
+				} else {
+					$.messager.alert("提示信息", "操作失败", "error");
+				}
+			},
+
+			error : function() {
+				$.messager.alert("提示信息", "系统繁忙", "warning");
+			}
+
+		});
+	}
+
+	//点击取消关闭对话框并清空对话框
+	function closeUserAddDialog() {
+
+		$("#dlg").dialog("close");
+		$("#fm").form("clear");
+	}
+
+	//修改物品信息数据回显
+	function openUserModifyDialog() {
+
+		var arryUserInfo = $("#dg").datagrid("getSelections");
+		if (arryUserInfo.length !== 1) {
+			$.messager.alert("提示", "请选择一个物品信息修改", "warning");
+		} else {
+			$("#dlg").dialog("open").dialog("setTitle", "修改物品信息");
+			path = "../InGoodsInfo/updateInGoodsInfo.do";
+			var userInfo = arryUserInfo[0];
+			$("#fm").form("load", userInfo);
+			$("#userName").attr("disabled", "disabled");
+
+		}
+	}
+	//删除物品信息
+	function openUserDeleteDialog() {
+
+		var rows = $("#dg").datagrid("getSelections");
+
+		var ids = [];
+		if (rows.length == 0) {
+			$.messager.alert("提示信息", "请选择要删除的物品信息", "warning");
+		} else {
+			$.each(rows, function(index, row) {
+
+				ids.push(row.ingiId);
+			});
+
+			var str = ids.join(",");
+			var length = rows.length;
+			
+			$.messager.confirm("提示信息", "确定要删除<font color='red' size='4'>"
+					+ length + "</font>种物品信息？", function(r) {
+				if (r) {
+					$.ajax({
+						url : "../InGoodsInfo/deleteInGoodsInfoByingiId.do",
+						type : "post",
+						dataType : "json",
+						data : {
+							str : str
+						},
+						success : function(data) {
+
+							if (data.msg > 0) {
+
+								$.messager.alert("提示",
+										"成功删除<font color='red' size='4'>"
+												+ data.msg + "</font>种物品信息","info");
+								$("#dg").datagrid("reload");
+							} else {
+								alert(data);
+								$.messager.alert("提示", "删除失败", "error");
+							}
+						},
+						error : function() {
+							$.messager.alert("提示", "系统繁忙。。。", "warning");
+						}
+					});
+				} else {
+					return false;
+				}
+			});
+
+		}
+
+	}
+	
+</script>
+</head>
+<body style="margin: 1px;">
+	<!-- 添加物品信息管理弹窗 -->
+	<div id="dlg" class="easyui-dialog"
+		style="width: 570px;height: 450px;padding: 10px 20px" closed="true"
+		buttons="#dlg-buttons">
+		<form id="fm" method="post">
+			<table cellspacing="5px">
+				<p>
+					<input type="hidden" id="ingiId" name="ingiId" />
+				</p>
+				<tr>
+					<td>物品编码：</td>
+					<td><input type="text" id="ingiCode" name="ingiCode"
+						class="easyui-validatebox" required="true" validType="isBlank" />
+					</td>
+				</tr>
+				<tr>
+					<td>物品名称：</td>
+					<td><input type="text" id="ingiName" name="ingiName"
+						class="easyui-validatebox" required="true" validType="isBlank" />
+				</td>
+				<tr>
+					<td>物品规格：</td>
+					<td><input type="text" id="ingiFormat" name="ingiFormat"
+						class="easyui-validatebox" required="true" validType="isBlank" />
+				</td>
+				</tr>
+ 			    物品类别：&nbsp;<input class="easyui-combobox" id="ingcid" name="ingcid" size="20" data-options="editable:false,panelHeight:'auto',valueField:'ingcid',textField:'ingcName',url:'../InGoodsInfo/ingcidComboxList.do'"/>
+			    物品类型：&nbsp;<input class="easyui-combobox" id="ingtid" name="ingtid" size="20" data-options="editable:false,panelHeight:'auto',valueField:'ingtid',textField:'ingtName',url:'../InGoodsInfo/ingtidComboxList.do'"/>
+  &nbsp;&nbsp;&nbsp;生产商：&nbsp;<input class="easyui-combobox" id="ingpid" name="ingpid" size="20" data-options="editable:false,panelHeight:'auto',valueField:'ingpid',textField:'ingpName',url:'../InGoodsInfo/ingpidComboxList.do'"/>
+ 				                               
+			
+				<tr>
+					<td>物品型号：</td>
+					<td><input type="text" id="ingiModel" name="ingiModel"
+						class="easyui-validatebox" required="true" validType="isBlank" />
+				</td>
+				</tr>
+				<tr>
+					<td>保质期：</td>
+					<td><input type="text" id="ingiShelflife" name="ingiShelflife"
+						class="easyui-validatebox" required="true" validType="isBlank" />
+				</td>
+				</tr>
+				<tr>
+					<td>备注：</td>
+					<td colspan="4"><textarea rows="3" cols="50" name="ingiRemark"
+							id="ingiRemark" ></textarea></td>
+				</tr>
+			</table>
+		</form>
+	</div>
+	<!-- 添加物品信息管理弹窗按钮 -->
+	<div id="dlg-buttons">
+		<a href="javascript:saveUser()" class="easyui-linkbutton" iconCls="icon-ok">保存</a> 
+	    <a href="javascript:closeUserAddDialog()" class="easyui-linkbutton" iconCls="icon-cancel">关闭</a>
+	</div>
+
+
+	<!-- 物品信息管理展示列表 -->
+	<table id="dg" title="物品信息管理" class="easyui-datagrid" fitColumns="true"
+		pagination="true" rownumbers="true"
+		url="../InGoodsInfo/SelectInGoodsInfo.do" fit="true" toolbar="#tb">
+		<thead>
+			<tr>
+				<th field="cb" checkbox="true" align="center"></th>
+				<th field="ingiId" width="50" align="center">物品ID</th>
+				<th field="ingiCode" width="50" align="center">物品编码</th>
+				<th field="ingiName" width="50" align="center">物品名称</th>
+				<th field="ingcName" width="50" align="center">物品类别</th>
+				<th field="ingtName" width="50" align="center">物品类型</th>
+				<th field="ingpName" width="50" align="center">物品生产商</th>
+				<th field="ingiFormat" width="50" align="center">物品规格</th>
+				<th field="ingiModel" width="50" align="center">物品型号</th>
+				<th field="ingiShelflife" width="50" align="center">保质期</th>
+				<th field="ingiExplosive" width="50" align="center" data-options="formatter:function(value,row,index){
+																								if(value==0){
+																									return '非易燃易爆'
+																								}else{
+																								return '易燃易爆'
+																								}
+																							}">易燃易爆标志</th>
+				<th field="ingiToxic" width="50" align="center">毒麻标志</th>
+				<th field="ingiCorrosion" width="50" align="center">腐蚀标志</th>
+				<th field="ingiFragile" width="50" align="center">易碎标志</th>
+				<th field="ingiRemark" width="50" align="center">备注</th>
+				<th field="ingiStopflag" width="50" align="center">停用标记</th>
+				<th field="optName" width="50" align="center">操作人</th>
+
+			</tr>
+		</thead>
+	</table>
+	<!-- 物品信息管理页面菜单栏 -->
+	<div id="tb">
+		<div>
+			<a href="javascript:openUserAddDialog()" class="easyui-linkbutton"
+				iconCls="icon-add" plain="true">添加</a> <a
+				href="javascript:openUserModifyDialog()" class="easyui-linkbutton"
+				iconCls="icon-edit" plain="true">修改</a> <a
+				href="javascript:openUserDeleteDialog()" class="easyui-linkbutton"
+				iconCls="icon-remove" plain="true">删除</a>
+		</div>
+		<div>
+			&nbsp;物品编码：&nbsp;<input type="text" name="s_ingiCode" id="s_ingiCode"
+				size="20" onkeydown="if(event.keyCode==13) searchUser()" />&nbsp;
+			&nbsp;物品名称：&nbsp;<input type="text" name="s_ingiName" id="s_ingiName"
+				size="20" onkeydown="if(event.keyCode==13) searchUser()" />&nbsp;
+			&nbsp;物品类型：&nbsp;<input class="easyui-combobox" id="s_ingtid" name="s_ingtid" 
+			               size="20" data-options="editable:false,panelHeight:'auto',
+			               valueField:'ingtid',textField:'ingtName',
+			               url:'../InGoodsInfo/ingtidComboxList.do'"/>
+			&nbsp;是否毒麻:&nbsp;<select class="easyui-combobox" id="ingiToxic" name="ingiToxic" data-options="editable:false,panelHeight:'auto'">
+				  <option value="">==请选择==</option>
+			      <option  value="0">非毒麻</option>
+			      <option value="1">毒麻</option>
+			</select>	
+				 <a href="javascript:searchUser()" class="easyui-linkbutton"
+				iconCls="icon-search" plain="true">搜索</a>
+		</div>
+	</div>
+
+</body>
+</html>

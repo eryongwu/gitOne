@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.eryong.dao.WorkBookDetailDao">
+  <resultMap type="WorkBookDetail" id="WorkBookDetailReslut">
+  		<id property="wBDId" column="wBDId"/>
+  		<result property="wBId" column="wBId"/>
+  		<result property="wBDName" column="wBDName"/>
+  		<result property="wBDRemark" column="wBDRemark"/>
+  		<result property="wBDDelFlag" column="wBDDelFlag"/>
+  		<result property="wBDState" column="wBDState"/>  		
+  		<result property="currentTime" column="currentTime"/>  
+  		<result property="optId" column="optId"/>  		
+  </resultMap>
+ 
+ 
+  <!-- 通过wBId查询所有 -->
+  <select id="getWorkBookDetailByWBId" parameterType="Integer" resultMap="WorkBookDetailReslut">    
+   	SELECT
+   	 wBDId,
+   	 wBId,
+   	 wBDName,
+   	 wBDRemark,
+   	 wBDDelFlag,
+   	 wBDState,
+   	 currentTime,
+   	 optId 
+   	FROM 
+   	 t_erp_workbookdetail 
+   	WHERE 
+   	 wBId=#{wBId}
+	and
+	 wBDDelFlag=0
+  </select>
+  
+  <!-- 插入数据 -->
+  <insert id="addWorkBookDetail" parameterType="WorkBookDetail">
+  	insert into 
+  		t_erp_workbookdetail
+  		(wBId,
+   	 	wBDName,
+   	 	wBDRemark,
+   	 	wBDDelFlag,
+   	 	wBDState,
+   	 	currentTime,
+   	 	optId 
+  		)
+  	values
+  		(#{wBId},
+   	 	#{wBDName},
+   	 	#{wBDRemark},
+   	 	0,
+   	 	0,
+   	 	#{currentTime},
+   	 	#{optId} 
+  		)
+  
+  
+  </insert>
+  
+  <!-- 删除所有字表 -->
+  <update id="deleteAllWorkBookDetailByWBId" parameterType="Integer">
+  	update
+  		t_erp_workbookdetail
+  	set 
+  		wBDDelFlag=1
+  	where 
+  		wBId=#{wBId}
+  
+  </update>
+  
+  <update id="upDateworkBookDetail" parameterType="WorkBookDetail">
+  	update
+  		t_erp_workbookdetail
+  	set 
+  		wBDName=#{wBDName},
+   	 	wBDRemark=#{wBDRemark}
+  	where 
+  		wBDId=#{wBDId}
+  
+  </update>
+  
+  <!-- 删除一条细表 -->
+  <update id="deleteDateworkBookDetailByWBDId" parameterType="Integer">
+  	update
+  		t_erp_workbookdetail
+  	set 
+  		wBDDelFlag=1
+  	where 
+  		wBDId=#{wBDId}
+  
+  </update>
+  <!-- 删除多条细表 -->
+  <update id="deleteWorkBookDetailByWbId" parameterType="Integer">
+    update
+  		t_erp_workbookdetail
+  	set 
+  		wBDDelFlag=1
+  	where 
+  		wBId=#{wBId}
+  
+  </update>
+</mapper>

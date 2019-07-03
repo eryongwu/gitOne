@@ -1,0 +1,214 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.eryong.dao.InGoodsInfoDao">
+  
+  <!-- 物品管理列表展示 -->
+  <select id="SelectInGoodsInfo" parameterType="Map"  resultType="InGoodsInfo">    
+  SELECT  
+         tei.ingiId,
+         tei.ingiCode,
+         tei.ingiName,
+         tei.ingcid,
+         tei.ingtid,
+         tei.ingpid,
+         tei.ingiFormat,
+         tei.ingiModel,
+         tei.ingiShelflife,
+         tei.ingiExplosive,
+         tei.ingiToxic,
+         tei.ingiCorrosion,
+         tei.ingiFragile,
+         tei.ingiRemark,
+         tei.ingiState,
+         tei.ingiStopflag,
+         tei.currDate,
+         teu.userName optName,
+         tet.ingtName,
+         tep.ingpName,
+         tec.ingcName 
+         
+	 FROM
+	      t_erp_ingoodsinfo tei
+LEFT JOIN   
+	      t_erp_user teu ON tei.optId=teu.`userId`
+LEFT JOIN
+          t_erp_ingoodstype tet ON tei.ingtId=tet.ingtId
+LEFT JOIN
+          t_erp_ingoodscategory tec ON tei.ingcId=tec.ingcId
+LEFT JOIN
+          t_erp_ingoodsproducer tep ON tei.ingpId=tep.ingpId             
+	WHERE
+	      tei.ingiState=0
+          
+          <if test="InGoodsInfo.ingiCode != null" >
+  			and tei.ingiCode like CONCAT('%',#{InGoodsInfo.ingiCode},'%')
+ 		</if>
+ 		
+ 		<if test="InGoodsInfo.ingiName!= null" >
+ 			and tei.ingiName like CONCAT('%',#{InGoodsInfo.ingiName},'%')
+ 		</if> 
+ 		<if test="InGoodsInfo.ingtid!= null" >
+ 			and tet.ingtid =#{InGoodsInfo.ingtid}
+ 		</if>
+ 		<if test="InGoodsInfo.ingiToxic!= null" >
+ 			and tei.ingiToxic =#{InGoodsInfo.ingiToxic}
+ 		</if>
+  	 order by tei.currDate desc
+ 	 limit #{pageBean.start},#{pageBean.rows}
+  </select>
+  
+  <!-- 物品管理列表分页 -->
+   <select id="SelectInGoodsInfoCount" parameterType="Map"  resultType="Integer">    
+  SELECT  
+         count(1)
+	 FROM
+	     t_erp_ingoodsinfo tei
+	WHERE
+	      ingiState=0
+     <if test="InGoodsInfo.ingiCode != null" >
+  			and tei.ingiCode like CONCAT('%',#{InGoodsInfo.ingiCode},'%')
+		</if>
+		
+		<if test="InGoodsInfo.ingiName!= null" >
+			and tei.ingiName like CONCAT('%',#{InGoodsInfo.ingiName},'%')
+		</if>
+		<if test="InGoodsInfo.ingtid!= null" >
+ 			and tei.ingtid =#{InGoodsInfo.ingtid}
+ 		</if> 
+ 		<if test="InGoodsInfo.ingiToxic!= null" >
+ 			and tei.ingiToxic =#{InGoodsInfo.ingiToxic}
+ 		</if>
+  </select>
+  
+  <!-- 添加物品类别查询 -->
+<select id="ingcidComboxList"  resultType="InGoodsInfo" >
+  	SELECT 
+  	     tei.ingcid,
+  	     tec.ingcName as ingcName
+  	FROM 
+  	      t_erp_ingoodscategory tec
+  	LEFT JOIN
+  	      t_erp_ingoodsinfo tei 
+  	   ON
+  	      tei.ingcid=tec.ingcId
+        WHERE 
+  	      tec.ingcDelflag=0 group by tec.ingcName
+ </select> 
+  
+   <!-- 添加物品类型查询 -->
+  <select id="ingtidComboxList"  resultType="InGoodsInfo" >
+  	select ingtid,ingtName from t_erp_ingoodstype where ingtDelflag=0 group by ingtName
+  </select>
+  
+   <!-- 添加物品生产商查询 -->
+   <select id="ingpidComboxList"  resultType="InGoodsInfo" >
+    	SELECT 
+  	     tei.ingpid,
+  	     tep.ingpName AS ingpName
+  	FROM 
+  	      t_erp_ingoodsproducer tep
+  	LEFT JOIN
+  	      t_erp_ingoodsinfo tei 
+  	   ON
+  	      tei.ingpid=tep.ingpId
+        WHERE 
+  	      tep.ingpDelflag=0 group by tep.ingpName
+  </select> 
+  
+  <!-- 验证物品编码是否重复 -->
+   <select id="selectInGoodsInfoByingiCode" parameterType="String" resultType="Integer" >
+  	select count(0) from t_erp_ingoodsinfo where ingiCode = #{ingiCode}
+  </select>
+  
+  <!-- 验证物品名称是否重复 -->
+   <select id="selectInGoodsInfoByingiName" parameterType="String" resultType="Integer" >
+  	select count(0) from t_erp_ingoodsinfo where ingiName = #{ingiName}
+  </select>
+  
+  <!-- 物品名称查询 -->
+   <select id="selectInGoodsInfoBy"  resultType="InGoodsInfo" >
+  	select ingiId,ingiName from t_erp_ingoodsinfo where ingiDelflag=0
+  </select>
+  
+  
+  <!-- 添加物品管理 -->
+  <insert id="addInGoodsInfo" parameterType="InGoodsInfo">
+  
+  	insert into 
+  	     t_erp_ingoodsinfo
+			   (
+		         ingiCode,
+		         ingiName,
+		         ingcid,
+		         ingtid,
+		         ingpid,
+		         ingiFormat,
+		         ingiModel,
+		         ingiShelflife,
+		         ingiExplosive,
+		         ingiToxic,
+		         ingiCorrosion,
+		         ingiFragile,
+		         ingiRemark,
+		         ingiState,
+		         ingiStopflag,
+		         currDate,
+		         optId          )
+	    values  (
+			    #{ingiCode},
+			    #{ingiName},
+			    #{ingcid},     
+			    #{ingtid},
+			    #{ingpid}, 
+			    #{ingiFormat},
+			    #{ingiModel},
+			    #{ingiShelflife},
+			    #{ingiExplosive},    
+			    #{ingiToxic},
+			    #{ingiCorrosion},
+			    #{ingiFragile},
+			    #{ingiRemark},
+			    #{ingiState},
+			    #{ingiStopflag},
+			    #{currDate},
+			    #{optId})
+  </insert>
+  
+   <!-- 物品管理逻辑删除 --> 
+	<update id="deleteInGoodsInfoByingiId" parameterType="Integer">
+	     update 
+	     		t_erp_InGoodsInfo
+	        set 
+	        	ingiDelflag
+	      where
+	        	ingiId=#{ingiId}
+	</update> 
+	
+<!-- 物品管理修改 -->
+	<update id="updateInGoodsInfo" parameterType="InGoodsInfo">
+	     update 
+	     	 t_erp_ingoodsinfo
+          set  	
+			  	ingiCode=#{ingiCode},
+			    ingiName= #{ingiName},
+			    ingcid=#{ingcid},     
+			    ingtid=#{ingtid},
+			    ingpid=#{ingpid}, 
+			    ingiFormat=#{ingiFormat},
+			    ingiModel=#{ingiModel},
+			    ingiShelflife=#{ingiShelflife},
+			    ingiExplosive=0,    
+			    ingiToxic=0,
+			    ingiCorrosion=0,
+			    ingiFragile= 0,
+			    ingiRemark=#{ingiRemark},
+			    ingiState=0,
+			    ingiStopflag=0,
+			    currDate=#{currDate},
+			    optId=#{optId}
+	      where
+	        	ingiId=#{ingiId}
+	</update>
+	
+	
+  </mapper>

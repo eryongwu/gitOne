@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.eryong.dao.InGoodSunitDao">
+	<resultMap type="InGoodSunit" id="InGoodSunitsult">
+	<result column="inguId" property="inguId"/>
+	<result column="inguCode" property="inguCode"/>
+	<result column="inguName" property="inguName"/>
+	<result column="inguSpell" property="inguSpell"/>
+	<result column="inguState" property="inguState"/>
+	<result column="inguDdelflag" property="inguDdelflag"/>
+	<result column="inguRremark" property="inguRremark"/>
+	<result column="currDate" property="currDate"/>
+	<result column="optId" property="optId"/>
+	<result column="optName" property="optName"/>
+	</resultMap>
+	<!--查找所有物品单位  -->
+	<select id="findAllSunit"  parameterType="Map" resultMap="InGoodSunitsult">
+			SELECT tei.`currDate`,
+	tei.`inguCode`,
+	tei.`inguDdelflag`,
+	tei.`inguId`,
+	tei.`inguName`,
+	tei.`inguRremark`,
+	tei.`inguSpell`,
+	tei.`inguState`,
+	tei.`optId`,
+	teu.`userName` optName
+		FROM `t_erp_ingoodsunit`tei
+		LEFT JOIN `t_erp_user` teu
+		ON tei.`optId`=teu.`userId`
+		WHERE tei.`inguDdelflag`=0
+		
+	<if test="inGoodSunit.inguName!=null">
+		and tei.`inguName` like '%${inGoodSunit.inguName}%'
+	</if> 
+	ORDER BY tei.`currDate` DESC
+		limit #{pageBean.start},#{pageBean.rows}
+	</select>
+	<!-- 查找物品单位总数 -->
+	<select id="findInGoodSunitCount" parameterType="Map" resultType="Integer">
+	SELECT count(*)
+		FROM `t_erp_ingoodsunit`
+		WHERE`inguDdelflag`=0
+	<if test="inGoodSunit.inguName!=null">
+		and inguName like '%${inGoodSunit.inguName}%'
+	</if>
+	</select>
+	<!-- 物品单位名唯一验证 -->
+	<select id="findInguNameIsExist" parameterType="String" resultType="Integer" >
+	select count(inguName) from t_erp_ingoodsunit where inguDdelflag=0 and inguName=#{inguName} 	
+	</select>
+	<!-- 添加物品单位 -->
+	<insert id="addSunit" parameterType="InGoodSunit">
+	insert into t_erp_ingoodsunit (
+		inguCode,
+		inguName,
+		inguSpell,
+		inguState,
+		inguDdelflag,
+		inguRremark,
+		currDate,
+		optId
+	)
+	VALUE(
+		#{inguCode},
+		#{inguName},
+		#{inguSpell},
+		#{inguState},
+		#{inguDdelflag},
+		#{inguRremark},
+		#{currDate},
+		#{optId})
+	</insert>
+	<!-- 修改物品单位 -->
+	<update id="updateSunit" parameterType="InGoodSunit">
+	update t_erp_ingoodsunit set 
+	`inguRremark`=#{inguRremark},
+	`inguSpell`=#{inguSpell}
+	where inguId=#{inguId}
+	</update>
+	<!-- 删除物品单位 -->
+	<update id="deleteInGoodSunitById" parameterType="Integer">
+	update t_erp_ingoodsunit set inguDdelflag=1 where inguId=#{inguId}
+	</update>
+	
+</mapper> 

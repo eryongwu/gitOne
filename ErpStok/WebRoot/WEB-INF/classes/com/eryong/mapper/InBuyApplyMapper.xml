@@ -1,0 +1,241 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.eryong.dao.InBuyApplyDao">
+  <resultMap type="InBuyApply" id="InBuyApplReslut">
+  		<id property="inbaId" column="inbaId"/>
+  		<result property="inbaCode" column="inbaCode"/>
+  		<result property="inbaName" column="inbaName"/>
+  		<result property="busiId" column="busiId"/>
+  		<result property="busiName" column="busiName"/>
+  		<result property="busiDeptId" column="busiDeptId"/>  		
+  		<result property="inbtId" column="inbtId"/>
+  		<result property="inbaReason" column="inbaReason"/>
+  		<result property="inbaDate" column="inbaDate"/>
+  		<result property="inbaRemark" column="inbaRemark"/>
+  		<result property="inbaState" column="inbaState"/>
+  		<result property="approvalview" column="approvalview"/>
+  		<result property="state" column="state"/>
+  		<result property="inbaDelflag" column="inbaDelflag"/>
+  		<result property="optId" column="optId"/>
+  		<result property="inbaCurrdate" column="inbaCurrdate"/>
+  		<collection property="inBuyApplyDetail" column="inbaId" ofType="InBuyApplyDetail"
+  		select="com.eryong.dao.InBuyApplyDetailDao.getInBuyApplyDetailByIbaId"></collection>  		
+  </resultMap>
+  <!-- 数据字典查询所有信息 -->
+	<select id="findAllInBuyApply" parameterType="Map" resultMap="InBuyApplReslut">
+			SELECT 
+			inbaId,
+			inbaCode,
+			inbaName,
+			busiId,
+			busiName,
+			busiDeptId,
+			inbtId,
+			inbaReason,
+			inbaDate,
+			inbaRemark,
+			inbaState,
+			approvalview,
+			state,
+			inbaDelflag,
+			optId,
+			inbaCurrdate
+			FROM  t_erp_inbuyapply
+			WHERE 	inbaDelflag=0
+			<if test="searchValue!=null">
+				and inbaName like '%${searchValue}%'
+			</if>
+		order by inbaCurrdate desc
+		limit #{pageBean.start},#{pageBean.rows}
+	</select>
+	<select id="findInBuyApply" parameterType="Map" resultMap="InBuyApplReslut">
+			SELECT 
+			inbaId,
+			inbaCode,
+			inbaName,
+			busiId,
+			busiName,
+			busiDeptId,
+			inbtId,
+			inbaReason,
+			inbaDate,
+			inbaRemark,
+			inbaState,
+			approvalview,
+			state,
+			inbaDelflag,
+			optId,
+			inbaCurrdate
+			FROM  t_erp_inbuyapply
+			WHERE 	inbaDelflag=0
+			and inbaState>=1
+			<if test="s_inbaName!=null">
+				and inbaName like '%${s_inbaName}%'
+			</if>
+			<if test="s_busiName!=null">
+				and busiName like '%${s_busiName}%'
+			</if>
+			<if test="s_inbaState!=null">
+				and inbaState = ${s_inbaState}
+			</if>
+			<if test="s_inbtId!=null">
+				and inbtId =${s_inbtId}
+			</if>
+		order by inbaCurrdate desc
+		limit #{pageBean.start},#{pageBean.rows}
+	</select>
+	<select id="findInBuyApplys" parameterType="Map" resultMap="InBuyApplReslut">
+			SELECT 
+			inbaId,
+			inbaCode,
+			inbaName,
+			busiId,
+			busiName,
+			busiDeptId,
+			inbtId,
+			inbaReason,
+			inbaDate,
+			inbaRemark,
+			inbaState,
+			approvalview,
+			state,
+			inbaDelflag,
+			optId,
+			inbaCurrdate
+			FROM  t_erp_inbuyapply
+			WHERE 	inbaDelflag=0
+			<if test="s_inbaName!=null">
+				and inbaName like '%${s_inbaName}%'
+			</if>
+			<if test="s_busiName!=null">
+				and busiName like '%${s_busiName}%'
+			</if>
+			<if test="s_inbaState!=null">
+				and inbaState = ${s_inbaState}
+			</if>
+			<if test="s_inbtId!=null">
+				and inbtId =${s_inbtId}
+			</if>
+		order by inbaCurrdate desc
+		limit #{pageBean.start},#{pageBean.rows}
+	</select>
+	<!-- 查询数据据字典数据总条数 -->
+	<select id="findInBuyApplyCount" parameterType="Map" resultType="Integer">
+		select 
+			count(1)
+		from 
+			t_erp_inbuyapply
+		where 
+			inbaDelflag=0
+			<if test="searchValue!=null">
+				and inbaName like '%${searchValue}%'
+			</if>
+	</select>
+	<select id="findInBuyApplyCounts" parameterType="Map" resultType="Integer">
+		select 
+			count(1)
+		from 
+			t_erp_inbuyapply
+		where 
+			inbaDelflag=0
+			<if test="s_inbaName!=null">
+				and inbaName like '%${s_inbaName}%'
+			</if>
+			<if test="s_busiName!=null">
+				and busiName like '%${s_busiName}%'
+			</if>
+			<if test="s_inbaState!=null">
+				and inbaState = ${s_inbaState}
+			</if>
+			<if test="s_inbtId!=null">
+				and inbtId =${s_inbtId}
+			</if>
+	</select>
+	
+	<select id="findInBuyApplyMaxId" resultType="Integer">
+		SELECT MAX(inbaId) FROM `t_erp_inbuyapply`
+	</select>
+	<select id="findinbaNameIsExist" resultType="Integer" parameterType="String">
+	select count(inbaName) from t_erp_inbuyapply where inbaName=#{inbaName}
+	</select>
+	
+	<insert id="addInBuyApply" parameterType="InBuyApply">
+	INSERT INTO
+			t_erp_inbuyapply(
+			
+			inbaCode,
+			inbaName,
+			busiId,
+			busiName,
+			busiDeptId,
+			inbtId,
+			inbaReason,
+			inbaDate,
+			inbaRemark,
+			inbaState,
+			approvalview,
+			state,
+			inbaDelflag,
+			optId,
+			inbaCurrdate
+			)
+			
+			VALUES(
+			
+			#{inbaCode},
+			#{inbaName},
+			#{busiId},
+			#{busiName},
+			#{busiDeptId},
+			#{inbtId},
+			#{inbaReason},
+			#{inbaDate},
+			#{inbaRemark},
+			#{inbaState},
+			#{approvalview},
+			#{state},
+			#{inbaDelflag},
+			#{optId},
+			#{inbaCurrdate})
+	</insert>
+	
+	<update id="updateInBuyApply" parameterType="InBuyApply">
+		UPDATE 
+		t_erp_inbuyapply
+		SET
+		inbaReason=#{inbaReason}		
+		WHERE
+		inbaId =#{inbaId}
+	</update>
+	
+	<update id="deleteInBuyApply" parameterType="Integer">
+		UPDATE t_erp_inbuyapply
+		SET
+		inbaDelflag=1			
+		WHERE
+		inbaId=#{inbaId}
+	</update> 
+	<update id="SubmitInBuyApply" parameterType="Integer">
+		UPDATE t_erp_inbuyapply
+		SET
+		inbaState=1			
+		WHERE
+		inbaId=#{inbaId}
+	</update> 
+	<update id="passInBuyApply" parameterType="Integer">
+		UPDATE t_erp_inbuyapply
+		SET
+		inbaState=2			
+		WHERE
+		inbaId=#{inbaId}
+	</update> 
+	<update id="rejectInBuyApply" parameterType="InBuyApply">
+	UPDATE t_erp_inbuyapply
+		SET
+		inbaState=-1,
+		approvalview=#{approvalview}			
+		WHERE
+		inbaId=#{inbaId}
+	</update>
+	
+</mapper>
