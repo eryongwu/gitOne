@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>userManager.html</title>
+	
+    <meta name="keywords" content="keyword1,keyword2,keyword3">
+    <meta name="description" content="this is my page">
+    <meta name="content-type" content="text/html; charset=UTF-8">
+    
+    <!--<link rel="stylesheet" type="text/css" href="./styles.css">-->
+<!--引入easyui全部样式-->
+		<link rel="stylesheet" type="text/css" href="../jquery-easyui-1.6.6/themes/default/easyui.css"  />
+		<!--引入图标-->
+		<link rel="stylesheet" type="text/css" href="../jquery-easyui-1.6.6/themes/icon.css" />
+		<!--导入jquery核心库-->
+		<script type="text/javascript" src="../jquery-easyui-1.6.6/jquery.min.js"></script>
+		<!--导入easyui核心库-->
+		<script type="text/javascript" src="../jquery-easyui-1.6.6/jquery.easyui.min.js"></script>
+		<!--导入汉库-->
+		<script type="text/javascript" src="../jquery-easyui-1.6.6/locale/easyui-lang-zh_CN.js" ></script>
+		<script type="text/javascript">
+		
+		var path = "";
+		
+		//jquery自定义验证规则空格不能通过验证
+		 $.extend($.fn.validatebox.defaults.rules,{
+            isBlank: {
+                validator: function (value, param) { 
+                	//去空格 return $.trim(value) != ""
+                	return (value.indexOf(" ")<0)//不能有空格
+                	},
+                message: "不能为空,请重新输入"
+            }
+        });
+		
+		
+		//模糊查询
+			function searchUser(){				
+				var s_userName = $("#s_userName").val();
+				var s_roleId = $("#s_roleId").val();				
+				$("#dg").datagrid("load",{
+					s_userName:s_userName,
+					s_roleId:s_roleId
+				});
+			}
+			
+			//添加打开表单
+			function openUserAddDialog(){
+				$("#dlg").dialog("open").dialog("setTitle","添加用户");
+				$("#fm").removeAttr("disabled","disabled");
+				path = "../user/addUserInfo.do";
+			}
+			
+			
+			
+			//光标移除验证用户名是否重复
+			$(function(){				
+				$("#userName").blur(function(){
+					var isValid = $(this).val();					
+					if(!!isValid){
+						var userName = $(this).val();
+						$.ajax({
+							url:path,
+							type:"post",
+							dataType:"json",
+							data:{
+								userNameVild:userName
+							},
+							success:function(data){
+								if(data.msg>0){
+									$.messager.alert("提示","用户<font color='red' size='6'>"+userName+"</font>已经存在","warning");
+									$("#userName").val("");
+								}
+							}
+						});
+					}else{
+						$.messager.alert("提示","不能有空格","warning");
+						return false;
+					}
+					
+					
+				});
+				
+			});
+			
+			//点击确定提交数据添加/修改
+			function saveUser(){
+				$("#fm").form("submit",{
+					url:path,
+					onSubmit:function(){
+						var isValid = $(this).form("validate");							
+						if(isValid){
+							return true;
+						}else{
+							$.messager.alert("错误提醒","请正确输入数据","warning");
+							return false;
+						}
+					},
+					success:function(data){
+						//alert(data);
+						var result=eval('('+data+')')						
+						if(result.msg>0){
+							$("#dlg").dialog("close");
+							$("#fm").form("clear");														
+							$.messager.alert("提示信息","添加成功","info");
+							$("#dg").datagrid("reload");
+							path = "";
+						}else{
+							$.messager.alert("提示信息","系统繁忙11","warning");
+						}
+						
+					},
+					error:function(){
+						$.messager.alert("提示信息","系统繁忙","warning");
+					}
+					
+				});							
+			}
+			
+			//点击取消关闭对话框并清空对话框
+			function closeUserAddDialog(){
+				
+				$("#dlg").dialog("close");
+				$("#fm").form("clear");
+			}
+			
+			//点击选择角色按钮
+			function openRoleChooseDialog(){
+				$("#dlg2").dialog("open").dialog("setTitle","角色选择");
+				var s_roleName = $("#s_roleName").val();
+				 
+				$("#dg2").datagrid("load",{
+					s_roleName:s_roleName
+				});
+			}
+			
+			//角色列表模糊查询
+			function searchRole(){
+				openRoleChooseDialog();
+			}
+			
+			//关闭角色列表
+			function closeRoleDialog(){
+				$("#dlg2").dialog("close");
+			}
+			
+			//选中角色提交
+			function chooseRole(){
+				var roleInfo = $("#dg2").datagrid("getSelected");				
+				$("#roleName").val(roleInfo.roleName);
+				$("#roleId").val(roleInfo.roleId);
+				closeRoleDialog();								
+			}
+			
+			
+			//修改用户数据回显
+			function openUserModifyDialog(){
+				
+				var arryUserInfo = $("#dg").datagrid("getSelections");
+				if(arryUserInfo.length !== 1){
+					$.messager.alert("提示","请选择一个用户修改","warning");
+				}else{
+					$("#dlg").dialog("open").dialog("setTitle","修改用户");
+					path = "../user/updateUserInfo.do";
+					var userInfo = arryUserInfo[0];
+					$("#fm").form("load",userInfo);
+					$("#userName").attr("disabled","disabled");
+					
+				}
+			}
+			//删除用户 
+			function openUserDeleteDialog(){
+				
+				var rows = $("#dg").datagrid("getSelections");
+				var ids = [];				
+				if(rows.length == 0){
+					$.messager.alert("提示信息","请选择要删除的用户","warning");										
+				}else{
+					$.each(rows,function(index,row){
+						
+						ids.push(row.userId);
+					});
+					
+					var str = ids.join(",");
+					var length = rows.length;
+					$.messager.confirm("提示信息","确定要删除<font color='red' size='6'>"+length+"</font>名用户？",function(r){ 
+						if(r){
+							$.ajax({
+								url:"../user/deleteUserInfo.do",
+								type:"post",
+								dataType:"json",
+								data:{
+									str:str
+								},
+								success:function(data){
+									if(data.msg != 0){
+										var count = data.msg;
+										$.messager.alert("提示","成功删除<font color='red' size='6'>"+count+"</font>名用户","info");										
+										$("#dg").datagrid("reload");
+									}else{
+										$.messager.alert("提示","系统繁忙","info");
+									}
+								},
+								error:function(){
+									$.messager.alert("提示","系统繁忙。。。","info");
+								}
+							});
+						}else{
+							return false;
+						}
+					});	
+					
+				}
+				
+				
+			}
+			
+		</script>
+  </head>
+  <body style="margin: 1px;">
+   <!-- 添加用户弹窗 -->
+   <div id="dlg" class="easyui-dialog" style="width: 570px;height: 350px;padding: 10px 20px" closed="true" buttons="#dlg-buttons">
+	 <form id="fm" method="post">	     
+		<table cellspacing="5px">
+			<p><input type="hidden" id="userId" name="userId" /></p>			
+			<tr><td>用户名：</td>
+			     <td><input type="text" id="userName" name="userName" class="easyui-validatebox" required="true" validType="isBlank"/></td>
+			     <td>&nbsp;&nbsp;&nbsp;&nbsp;</td><td>用户密码：</td>
+			     <td><input type="text" id="password" name="password" class="easyui-validatebox" required="true" validType="isBlank"/></td>
+			</tr>
+			<tr><td>角色名称：</td>
+				<td><input type="hidden" id="roleId" name="roleId"/>
+					<input type="text" id="roleName" name="roleName" class="easyui-validatebox" required="true" readonly="readonly" />
+				</td><td>&nbsp;&nbsp;&nbsp;&nbsp;</td>
+				<td colspan="2">
+					<a href="javascript:openRoleChooseDialog()" class="easyui-linkbutton">选择角色</a>
+				</td>
+			</tr>
+			<tr><td>备注：</td><td colspan="4">
+			    <textarea rows="7" cols="50" name="userDescription" id="userDescription"></textarea></td>
+			</tr>
+		</table>
+	 </form>	
+	</div>
+	<!-- 添加用户弹窗按钮 -->
+	<div id="dlg-buttons">
+	      <a href="javascript:saveUser()" class="easyui-linkbutton" iconCls="icon-ok">保存</a>
+	      <a href="javascript:closeUserAddDialog()" class="easyui-linkbutton" iconCls="icon-cancel">关闭</a>
+	</div> 
+	<!-- 添加/用户角色选择弹窗 --> 
+	<div id="dlg2" class="easyui-dialog" iconCls="icon-search" style="width: 500px;height: 480px;padding: 10px 20px" closed="true" buttons="#dlg2-buttons">
+	      <div style="height: 40px" align="center">
+			角色名称：<input type="text" id="s_roleName" name="s_roleName" onkeydown="if(event.keyCode==13) searchRole()"/>
+			<a href="javascript:searchRole()" class="easyui-linkbutton" iconCls="icon-search" plain="true">搜索</a>
+		  </div>
+		  <!-- 角色展示列表 -->
+	      <div style="height: 350px;">
+				<table id="dg2" title="查询结果" class="easyui-datagrid" fitColumns="true" pagination="true" rownumbers="true" fit="true" singleSelect="true" url="../roleInfo/findAllRole.do">
+				  <thead>
+					<tr>
+						<th field="roleId" width="50" align="center">编号</th>
+				        <th field="roleName" width="100" align="center">角色名称</th>			        
+				        <th field="state" width="100" align="center">状态</th>
+				        <th field="currentTime" width="100" align="center">创建时间</th>			        
+				        <th field="roleDescription" width="50" align="center">备注</th>
+			        </tr>
+		     	  </thead>
+		      </table>
+		  </div>
+	</div>
+	<!-- 角色选择列表按钮 -->
+	<div id="dlg2-buttons">
+	      <a href="javascript:chooseRole()" class="easyui-linkbutton" iconCls="icon-ok">确定</a>
+	      <a href="javascript:closeRoleDialog()" class="easyui-linkbutton" iconCls="icon-cancel">关闭</a>
+	</div> 
+	
+	
+  	  <!-- 用户展示列表 -->
+      <table id="dg" title="用户管理" class="easyui-datagrid" fitColumns="true" pagination="true" rownumbers="true" url="../user/findAllUsers.do" 	fit="true" toolbar="#tb">
+		    <thead>
+			    <tr>
+					<th field="cb" checkbox="true" align="center"></th>
+					<th field="userId" width="50" align="center">编号</th>
+					<th field="userName" width="50" align="center">用户名</th>
+					<th field="password" width="50" align="center">用户密码</th>
+					<th field="roleId" width="50" align="center" hidden="true">用户角色ID</th>
+					<th field="roleName" width="50" align="center">用户角色</th>
+					<th field="userDescription" width="50" align="center">备注</th>
+				</tr>
+	  		</thead>	
+	   </table>
+	<!-- 用户管理页面菜单栏 -->
+    <div id="tb">
+		<div>
+			<a href="javascript:openUserAddDialog()" class="easyui-linkbutton" iconCls="icon-add" plain="true">添加</a>
+			<a href="javascript:openUserModifyDialog()" class="easyui-linkbutton" iconCls="icon-edit" plain="true">修改</a>
+			<a href="javascript:openUserDeleteDialog()" class="easyui-linkbutton" iconCls="icon-remove" plain="true">删除</a>
+	    </div>
+	    <div>&nbsp;用户名：&nbsp;<input type="text" name="s_userName" id="s_userName" size="20" onkeydown="if(event.keyCode==13) searchUser()"/>&nbsp;用户角	色：&nbsp;<input class="easyui-combobox" id="s_roleId" name="s_roleId" size="20" data-options="editable:false,panelHeight:'auto',valueField:'roleId',textField:'roleName',url:'../roleInfo/roleComboxList.do'"/>
+			<a href="javascript:searchUser()" class="easyui-linkbutton" iconCls="icon-search" plain="true">搜索</a>
+		</div>
+	</div>
+	
+ </body>	
+</html>

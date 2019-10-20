@@ -1,0 +1,167 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.eryong.dao.InBuyApplyDetailDao">
+  <resultMap type="InBuyApplyDetail" id="InBuyApplyDetailReslut">
+  		<id property="inbadId" column="inbaId"/>
+  		<result property="inbaId" column="inbaId"/>
+  		<result property="ingiId" column="ingiId"/>
+  		<result property="myCou" column="myCou"/>
+  		<result property="myPrice" column="myPrice"/>
+  		<result property="myMoney" column="myMoney"/>  		
+  		<result property="taxPrice" column="taxPrice"/>
+  		<result property="taxMoney" column="taxMoney"/>
+  		<result property="invoicesMoney" column="invoicesMoney"/>
+  		<result property="payMoney" column="payMoney"/>
+  		<result property="inbaRemark" column="inbaRemark"/>
+  		<result property="inbaState" column="inbaState"/>
+  		<result property="inbaDelflag" column="inbaDelflag"/>
+  		<result property="ingiName" column="ingiName"/>
+  </resultMap>
+  <!-- 数据字典查询所有信息 -->
+	<select id="getInBuyApplyDetailByIbaId" parameterType="Map" resultMap="InBuyApplyDetailReslut">
+								SELECT 
+						tei.inbadId,
+						tei.inbaId,
+						tei.ingiId,
+						tei.myCou,
+						tei.myPrice,
+						tei.myMoney,
+						tei.taxPrice,
+						tei.taxMoney,
+						tei.invoicesMoney,
+						tei.payMoney,
+						tei.inbaRemark,
+						tei.inbaState,
+						tei.inbaDelflag,
+						teg.`ingiName` ingiName
+						FROM `t_erp_inbuyapplydetail` tei
+						LEFT JOIN  `t_erp_ingoodsinfo` teg
+						ON tei.ingiId=teg.`ingiId`
+						WHERE tei.inbaDelflag=0
+						AND tei.inbaId=#{inbaId}
+	</select>
+	<select id="findAllinBuyApplyDetailByInbaId" parameterType="Integer" resultMap="InBuyApplyDetailReslut">
+	SELECT 
+						inbadId,
+						inbaId,
+						ingiId,
+						myCou,
+						myPrice,
+						myMoney,
+						taxPrice,
+						taxMoney,
+						invoicesMoney,
+						payMoney,
+						inbaRemark,
+						inbaState,
+						inbaDelflag
+						FROM `t_erp_inbuyapplydetail` 
+						WHERE inbaDelflag=0
+						AND inbaId=#{inbaId}
+	</select>
+	<select id="findinBuyApplyDetail" resultMap="InBuyApplyDetailReslut">
+	SELECT 
+						tei.inbadId,
+						tei.inbaId,
+						tei.ingiId,
+						tei.myCou,
+						tei.myPrice,
+						tei.myMoney,
+						tei.taxPrice,
+						tei.taxMoney,
+						tei.invoicesMoney,
+						tei.payMoney,
+						tei.inbaRemark,
+						tei.inbaState,
+						tei.inbaDelflag,
+						teg.`ingiName` ingiName
+						FROM `t_erp_inbuyapplydetail` tei
+						LEFT JOIN  `t_erp_ingoodsinfo` teg
+						ON tei.ingiId=teg.`ingiId`
+						WHERE tei.inbaDelflag=0
+						AND tei.inbaState=2
+	</select>
+	<insert id="addWorkBookDetail" parameterType="InBuyApplyDetail">
+		INSERT INTO 
+			t_erp_inbuyapplydetail(
+				
+						inbaId,
+						ingiId,
+						myCou,
+						myPrice,
+						myMoney,
+						taxPrice,
+						taxMoney,
+						invoicesMoney,
+						payMoney,
+						inbaRemark,
+						inbaState,
+						inbaDelflag
+			)VALUES(
+						#{inbaId},
+						#{ingiId},
+						#{myCou},
+						#{myPrice},
+						#{myMoney},
+						#{taxPrice},
+						#{taxMoney},
+						#{invoicesMoney},
+						#{payMoney},
+						#{inbaRemark},
+						#{inbaState},
+						#{inbaDelflag}
+			)
+	</insert>
+	
+	<update id="deleteWorkBookDetail" parameterType="Integer" >
+		update 
+			t_erp_inbuyapplydetail
+		set
+			inbaDelflag=1
+		where
+			inbadId=#{inbadId}
+	</update>
+	
+	<update id="updateWorkBookDetail" parameterType="InBuyApplyDetail">
+		update 
+			t_erp_inbuyapplydetail
+		set
+			ingiId=#{ingiId},
+			myCou=#{myCou},
+			myPrice=#{myPrice},
+			myMoney=#{myMoney},
+			taxPrice=#{taxPrice},
+			taxMoney=#{taxMoney},
+			invoicesMoney=#{invoicesMoney},
+			payMoney=#{payMoney},
+			inbaRemark=#{inbaRemark}
+		where
+			inbadId=#{inbadId}
+	</update>
+	
+	<update id="deleteInBuyApplyDetailByInbaId" parameterType="Integer">
+		update 
+			t_erp_inbuyapplydetail
+		set
+			inbaDelflag=1
+		where
+			inbaId=#{inbaId}
+	</update>
+	<update id="rejectInBuyApplyDetailByInbaId"  parameterType="Integer">
+	update 
+			t_erp_inbuyapplydetail
+		set
+			inbaState=-1
+		where
+			inbaId=#{inbaId}
+	</update>
+	<update id="passInBuyApplyDetail" parameterType="Integer">
+		UPDATE t_erp_inbuyapplydetail
+		SET
+		inbaState=2		
+		WHERE
+		inbaId=#{inbaId}
+	</update> 
+	
+	
+</mapper>

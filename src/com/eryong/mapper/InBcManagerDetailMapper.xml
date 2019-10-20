@@ -1,0 +1,229 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.eryong.dao.InBcManagerDaoDetail">
+  <resultMap type="InBuyContractDetail" id="InBuyContractDetailResult">
+  		<id property="inbcdId" column="inbcdId"/>
+  		<result property="inbaId" column="inbaId"/>
+  		<result property="inbadId" column="inbadId"/>
+  		<result property="inbcId" column="inbcId"/>
+  		<result property="insiId" column="insiId"/>
+  		<result property="ingiId" column="ingiId"/>  		
+  		<result property="myPrice" column="myPrice"/>
+  		<result property="myCou" column="myCou"/>
+  		<result property="myMoney" column="myMoney"/>
+  		<result property="taxPrice" column="taxPrice"/>
+  		<result property="taxMoney" column="taxMoney"/>
+  		<result property="invoicesMoney" column="invoicesMoney"/>
+  		<result property="payMoney" column="payMoney"/>
+  		<result property="inbcRemark" column="inbcRemark"/>
+  		<result property="inbcState" column="inbcState"/>
+  		<result property="inbcDelflag" column="inbcDelflag"/>
+  </resultMap>
+  <!-- 查询数据字典  -->
+  <select id="getBcManagerDetailById"  resultMap="InBuyContractDetailResult" parameterType="Integer">    
+   	SELECT
+   	     inbcdId,
+	   	 tebc.inbaId,
+	   	 tebc.inbadId,
+	   	 tebc.inbcId,
+	   	 tebc.insiId,
+	   	 tebc.ingiId,
+	   	 tego.ingiName,
+	   	 tebc.myPrice,
+	   	 tebc.myCou,
+	   	 tebc.myMoney,
+	   	 tebc.taxPrice,
+	   	 tebc.taxMoney,
+	   	 tebc.invoicesMoney,
+	   	 tebc.payMoney,
+	   	 tebc.inbcRemark,
+	   	 tebc.inbcState,
+	   	 tebc.inbcDelflag
+   	FROM 
+   	   t_erp_inbuycontractdetail tebc
+   	LEFT JOIN 
+	   t_erp_ingoodsinfo tego
+	ON
+	   tebc.ingiId = tego.ingiId
+   	WHERE 
+	   tebc.inbcDelflag=0
+	and inbcId=#{inbcId}
+  </select>
+  
+  <!-- 添加合同细表 -->
+  <insert id="addBcManagerDetail" parameterType="InBuyContractDetail">
+  
+  		insert into 
+  			t_erp_inbuycontractdetail
+		   	 (inbcId,
+		   	 inbaId,		   	 
+		     inbadId,		   	
+		   	 insiId,
+		   	 ingiId,		   	
+		   	 myPrice,
+		   	 myCou,
+		   	 myMoney,
+		   	 taxPrice,
+		   	 taxMoney,
+		   	 invoicesMoney,
+		   	 payMoney,
+		   	 inbcRemark,
+		   	 inbcState,
+		   	 inbcDelflag)		   	 
+		values
+		   	 (#{inbcId},
+		   	 #{inbaId},
+		     #{inbadId},		   	
+		   	 #{insiId},
+		   	 #{ingiId},		   
+		   	 #{myPrice},
+		   	 #{myCou},
+		   	 #{myMoney},
+		   	 #{taxPrice},
+		   	 #{taxMoney},
+		   	 #{invoicesMoney},
+		   	 #{payMoney},
+		   	 #{inbcRemark},
+		   	 #{inbcState},
+		   	 0)
+  </insert>
+  
+  <!-- 根据主表id删除子表 -->
+  <update id="deleteBcManagerDetailByInbcdIds" parameterType="map">
+    update  
+        t_erp_inbuycontractdetail
+    set 
+  		inbcDelflag=1
+  	where 
+  		inbcId=#{inbcId}
+  	and 
+  		inbadId=#{inbadId}
+  </update>
+  
+  <!-- 根据字表子表id删除字表 -->
+  <update id="deleteBcManagerDetailByInbcdId" parameterType="Integer">
+  
+  	update 
+  		t_erp_inbuycontractdetail
+  	set
+  		inbcDelflag=1
+  	where
+  		inbcdId=#{inbcdId} 
+  </update>
+  
+  <!-- 通过合同id和申请详情id查询是否存在 -->
+  	<select id="findInBuyContractDetailByIds" parameterType="Map" resultType="Integer">
+  		select count(0) from t_erp_inbuycontractdetail where inbcId=#{inbcId} and inbadId=#{inbadId} and inbcDelflag=0
+  	</select>
+  	
+  	<select id="fidnAllDetilByInbcId" parameterType="Integer" resultType="InBuyContractDetail">
+  		SELECT
+   	     inbcdId,
+	   	 tebc.inbaId,
+	   	 tebc.inbadId,
+	   	 tebc.inbcId,
+	   	 tebc.insiId,
+	   	 tebc.ingiId,
+	   	 tego.ingiName,
+	   	 tebc.myPrice,
+	   	 tebc.myCou,
+	   	 tebc.myMoney,
+	   	 tebc.taxPrice,
+	   	 tebc.taxMoney,
+	   	 tebc.invoicesMoney,
+	   	 tebc.payMoney,
+	   	 tebc.inbcRemark,
+	   	 tebc.inbcState,
+	   	 tebc.inbcDelflag
+   	FROM 
+   	   t_erp_inbuycontractdetail tebc
+   	LEFT JOIN 
+	   t_erp_ingoodsinfo tego
+	ON
+	   tebc.ingiId = tego.ingiId
+   	WHERE 
+	   tebc.inbcDelflag=0
+	and inbcId=#{inbcId}
+  	</select>
+  	
+  	<!-- 根据主表id删除子表 -->
+  		<update id="deleteBcManagerDetailById" parameterType="Integer">
+  			update t_erp_inbuycontractdetail set inbcDelflag=1 where inbcId=#{inbcId}
+  		</update>
+  		
+  	<!-- 查询所有审核通过合同明细 -->
+  		<select id="findAllBced" resultType="InBuyContractDetail">
+  				SELECT
+	   	     inbcdId,
+		   	 tebc.inbaId,
+		   	 tebc.inbadId,
+		   	 tebc.inbcId,
+		   	 tebc.insiId,
+		   	 tebc.ingiId,
+		   	 tego.ingiName,
+		   	 tebc.myPrice,
+		   	 tebc.myCou,
+		   	 tebc.myMoney,
+		   	 tebc.taxPrice,
+		   	 tebc.taxMoney,
+		   	 tebc.invoicesMoney,
+		   	 tebc.payMoney,
+		   	 tebc.inbcRemark,
+		   	 tebc.inbcState,
+		   	 tebc.inbcDelflag,
+		   	 tebu.`inbaName`,
+		   	 tebct.`inbcName`,
+		   	 tesu.`insiName`   	 
+	   	FROM 
+	   	   t_erp_inbuycontractdetail tebc
+	   	LEFT JOIN 
+		   t_erp_ingoodsinfo tego
+		ON
+		   tebc.ingiId = tego.ingiId
+		left join
+		   t_erp_inbuycontract tebcd
+		on
+		   tebc.`inbcId`= tebcd.`inbcId`
+		left join
+		   `t_erp_inbuyapply` tebu
+		on
+		    tebu.`inbaId`=tebc.`inbadId`
+		left join
+		   `t_erp_inbuycontract` tebct
+		on
+		    tebct.`inbcId`=tebc.`inbcId` 
+		left join
+		  `t_erp_insupplierinfo`  tesu
+		on
+		    tesu.`insiId`=tebc.`insiId`
+	   	WHERE 
+		   tebc.inbcDelflag=0
+		
+		and 
+		   tebc.inbcState= 4
+		
+  		</select>
+  		
+  		<update id="updateInbcState" parameterType="InBuyOrderDetail">
+  			update t_erp_inbuycontractdetail set inbcState = 6 where inbcdId = #{inbcdId} and inbcId =#{inbcId}
+  		
+  		</update>
+  		
+  </mapper>
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  

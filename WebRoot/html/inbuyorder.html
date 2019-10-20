@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>workBookManager.html</title>
+	
+    <meta name="keywords" content="keyword1,keyword2,keyword3">
+    <meta name="description" content="this is my page">
+    <meta name="content-type" content="text/html; charset=UTF-8">
+    
+    <!--<link rel="stylesheet" type="text/css" href="./styles.css">-->
+<!--引入easyui全部样式-->
+		<link rel="stylesheet" type="text/css" href="../jquery-easyui-1.6.6/themes/default/easyui.css"  />
+		<!--引入图标-->
+		<link rel="stylesheet" type="text/css" href="../jquery-easyui-1.6.6/themes/icon.css" />
+		<!--导入jquery核心库-->
+		<script type="text/javascript" src="../jquery-easyui-1.6.6/jquery.min.js"></script>
+		<!--导入easyui核心库-->
+		<script type="text/javascript" src="../jquery-easyui-1.6.6/jquery.easyui.min.js"></script>
+		<!--导入汉库-->
+		<script type="text/javascript" src="../jquery-easyui-1.6.6/locale/easyui-lang-zh_CN.js" ></script>
+		<script type="text/javascript">
+		
+	//FORM表单序列化转对象
+	function serializeObject(form) {
+		var o = {};
+		$.each(form.serializeArray(), function(index) {
+			if (o[this['name']]) {
+				o[this['name']] = o[this['name']] + "," + this['value'];
+			} else {
+				o[this['name']] = this['value'];
+			}
+		});
+		return o;
+	}
+		
+		var addUrl="../inIBuyOrder/addAllOrder.do";
+		var modfiy="../inIBuyOrder/updateInIBuyOrder.do";
+		var url="";
+		//页面加载完成之后执行事件
+		$(function(){
+			init();
+			$("#dg").datagrid({	//点击主表列表信息时候触发事件
+				onClickRow:function(){					
+					var row=$("#dg").datagrid("getSelected");	//获取选中主表行的数据
+					$("#workBookEditForm").form('load',row);	//将主表信息添加到form表单					
+					$("#dgDetail").datagrid('loadData',row.inBuyOrderDetail);	//将主表附带子表信息添加到子表datagrid中
+				}
+			});
+		});
+		
+		//点击新建按钮触发事件
+		function newWorkBookInfo(){
+			$("#workBookEditForm").form("clear");	//清空form表单
+			$("#dgDetail").datagrid('loadData',{	//清空子表信息
+				total:0,
+				rows:[]
+			});
+			$("#workBookEditForm :input").removeAttr("disabled", "disabled");
+			$("#workBookEditForm").form("enableValidation");//启用验证
+			$("#workBookDeatilAdd").linkbutton({disabled:false});
+			$("#workBookDeatilUpdate").linkbutton({disabled:false});
+			$("#workBookDeatilDel").linkbutton({disabled:false});
+			$("#workBookDeatilSav").linkbutton({disabled:false});
+			$("#workBookManager_editbtn").linkbutton({disabled:true});
+			$("#workBookManager_delbtn").linkbutton({disabled:true});
+			$("#workBookManager_canclebtn").linkbutton({disabled:false});
+			url=addUrl;	//给新增添加路径
+		}
+		
+		/* //点击新建按钮触发事件
+		 function newWorkBookInfo(){
+				$("#workBookEditForm").form("clear");	//清空form表单
+				$("#dgDetail").datagrid('loadData',{	//清空子表信息
+					total:0,
+					rows:[]
+				});
+				$("#workBookEditForm :input").removeAttr("disabled", "disabled");
+				$("#workBookEditForm").form("enableValidation");//启用验证
+				$("#bcManagerDeatilAdd").linkbutton({disabled:false});
+				$("#bcManagerDeatilUpdate").linkbutton({disabled:false});
+				$("#bcManagerDeatilDel").linkbutton({disabled:false});
+				$("#bcManagerDeatilSav").linkbutton({disabled:false});
+				$("#bcManagerManager_editbtn").linkbutton({disabled:true});
+				$("#bcManagerManager_delbtn").linkbutton({disabled:true});
+				$("#bcManagerManager_canclebtn").linkbutton({disabled:false});
+				url=addUrl;	//给新增添加路径
+			} */
+		
+		//点击保存按钮触发事件
+		function saveForm(){
+			$("#workBookEditForm :input").removeAttr("disabled", "disabled");
+			var form=$("#workBookEditForm");	//获取form表单数据
+			var inIBuyOrder=serializeObject(form);	//将form表单数据序列化成对象
+			var inBuyOrderDetail=$("#dgDetail").datagrid("getRows");	//获取子表所有信息
+			if(inBuyOrderDetail){//如果子表信息非空，则将子表数据添加到workBook对象中去
+				inIBuyOrder.inBuyOrderDetail=inBuyOrderDetail;
+			}
+			console.info(JSON.stringify(inIBuyOrder)); //在浏览器控制台打印信息
+			$.ajax({
+				url:url,
+				type:"post",
+				dataType:'json',
+				contentType : 'application/json;charset=UTF-8', //如果后台使用@RequestBoby接收参数，ajax提交必须写该行
+				data:JSON.stringify(inIBuyOrder),	//将对象转换成json串，进行传值
+				success:function(result){
+					if(result.add>0 || result.del>0 || result.upd>0){
+						$.messager.alert("系统提示","保存成功","info");
+						$("#dg").datagrid("reload");
+						init();
+					}else{
+						$.messager.alert("系统提示","保存失败","warning");
+					}
+				},
+				error:function(){
+					$.messager.alert("系统提示","系统繁忙","error");
+				}
+			});
+			url="";
+		}
+		
+		//页面初始化触发事件
+		function init(){
+			$("#workBookEditForm").form("clear");	//清空form表单
+			$("#dgDetail").datagrid('loadData',{	//清空子表信息
+				total:0,
+				rows:[]
+			});
+			url="";
+			$('#workBookEditForm').form("disableValidation");//取消form 表单验证
+			$("#workBookManager_savebtn").linkbutton({disabled:true});
+			$("#workBookManager_canclebtn").linkbutton({disabled:true});
+			$("#workBookEditForm :input").attr("disabled", "disabled");
+			$("#workBookDeatilAdd").linkbutton({disabled:true});
+			$("#workBookDeatilUpdate").linkbutton({disabled:true});
+
+			$("#workBookManager_editbtn").linkbutton({disabled:false});
+			$("#workBookDeatilDel").linkbutton({disabled:true});
+			$("#workBookDeatilSav").linkbutton({disabled:true});
+			$("#workBookManager_newbtn").linkbutton({disabled:false});
+			$("#workBookManager_delbtn").linkbutton({disabled:false});
+		}
+		
+		//点击子表添加按钮触发事件
+		/* function wbDetailManager(){
+			$("#dlg3").dialog("open").dialog("setTitle","添加订单");
+			$("#dgDetail").datagrid("appendRow",{});//子表行编辑添加一行
+			var editIndex_wbDetail = $('#dgDetail').datagrid('getRows').length - 1;//定位选中该行的下标
+			$("#dgDetail").datagrid("beginEdit",editIndex_wbDetail);//开启改行的行编辑
+			
+		} */
+		
+		//添加合同细表打开弹窗并加载数据
+		function wbDetailManager() {
+			$("#dlgBc").dialog("open").dialog("setTitle", "签过合同物品");
+		
+	    }
+		
+		//点击保存按钮将选择物品填入合同细表
+		function saveBcManager(){
+		
+		var applyData = $("#dgBc").datagrid("getSelections");			
+		$("#dgDetail").datagrid("loadData",applyData);
+		closeBcManagerAddDialog();
+		}
+		//关闭添加弹窗
+		function closeBcManagerAddDialog(){
+			$("#dlgBc").dialog("close");
+			}
+		
+		//点击子表保存按钮触发事件
+		function saveWb_detail(){
+			$("#workBookManager_savebtn").linkbutton({disabled:false});
+			var endRows=$("#dgDetail").datagrid("getRows");	//获取子表所有行级信息
+			$.each(endRows,function(index,item){	//遍历子表所有行级信息，其中（index表示角标，item表示数据）
+				$("#dgDetail").datagrid("endEdit",index);	//结束行编辑
+				$("#dgDetail").datagrid("cancelEdit",index)
+			});
+		}
+		
+		//点击取消按钮触发事件
+		function cancleworkBook(){
+			init();
+			$("#workBookManager_editbtn").linkbutton({disabled:false});
+			$("#workBookManager_delbtn").linkbutton({disabled:false});
+			$("#workBookManager_newbtn").linkbutton({disabled:false});
+		}
+		
+		//点击子表修改按钮触发事件
+		function wbDetailModify(){
+			$("#dgDetail").datagrid({
+				onClickRow:function(index){	//子表行点击事件
+					var ee = $("#dgDetail").datagrid("getColumnOption", "currentTime");
+					ee.editor={};
+					$("#dgDetail").datagrid("beginEdit",index);	//开启行编辑
+					
+				}
+			});
+			
+			var rows=$("#dgDetail").datagrid("getRows");
+			$.each(rows,function(index,row){
+				var index=$("#dgDetail").datagrid("getRowIndex",row);
+				//$("#dgDetail").datagrid("deleteRow",index);	
+			});
+		}
+		
+		function delworkBook(){
+			var row=$("#dg").datagrid("getSelected");
+			if(row==null||row==undefined){
+				$.messager.alert("系统提示","请选择要删除的数据","info");
+				return ;
+			}
+			var inboId=row.inboId;
+			
+			$.messager.confirm("系统提示","您确认要删除吗？",function(r){
+				if(r){
+					$.ajax({
+						url:"../inIBuyOrder/deleteOrder.do",
+						type:"post",
+						dataType:"json",
+						data:{inboId:inboId},
+						success:function(result){
+							if(result.success>0){
+								$.messager.alert("系统提示","删除成功","info");
+								$("#dg").datagrid("reload");
+								init();
+							}else{
+								$.messager.alert("系统提示","删除失败","info");
+							}
+						},
+						error:function(){
+							$.messager.alert("系统提示","系统繁忙","info");
+						}
+					});
+				}
+			});
+		}
+		
+		//点击主表修改
+		function editworkBook(){
+			var row=$("#dg").datagrid("getSelected");
+			if(row==null||row==undefined){
+				$.messager.alert("系统提示","请选择要修改的数据","info");
+				return ;
+			}
+			$("#workBookDeatilAdd").linkbutton({disabled:false});
+			$("#workBookDeatilUpdate").linkbutton({disabled:false});
+			$("#workBookDeatilDel").linkbutton({disabled:false});
+			$("#workBookDeatilSav").linkbutton({disabled:false});
+			$("#workBookManager_canclebtn").linkbutton({disabled:false});
+			$("#workBookManager_newbtn").linkbutton({disabled:true});
+			$("#workBookManager_delbtn").linkbutton({disabled:true});
+			//$("#workBookEditForm :input").removeAttr("disabled", "disabled");
+			url=modfiy;
+		}
+		
+		function wbDetailDelete(){
+			var rows=$("#dgDetail").datagrid("getSelections");
+			$.each(rows,function(index,row){	//遍历子表所有行级信息，其中（index表示角标，item表示数据）
+				var index=$("#dgDetail").datagrid("getRowIndex",row);
+				$("#dgDetail").datagrid("deleteRow",index);	
+			}); 
+		}
+		
+	</script>
+  </head>
+  <body>
+<div class="easyui-layout" data-options="fit:true">
+	<div data-options="region:'north'"
+		style="height: 32px; background-color: #E0ECFF; width: 1235px; background-position: initial initial; background-repeat: initial initial;">
+		<div style="float: right; padding-right: 20px">
+			名称: <input class="easyui-validatebox" style="width: 80px"
+				name="searchValue" id="searchValue"> <a
+				href="javascript:void(0)" class="easyui-linkbutton"
+				iconCls="icon-search" onclick="workBookManager.search()">查询</a>
+		</div>
+		<div>
+			<a id="workBookManager_newbtn" href="javascript:void(0)"
+				onclick="newWorkBookInfo()"
+				class="easyui-linkbutton" iconCls="icon-add" plain="true">新建</a>
+		    <a  id="workBookManager_editbtn" href="javascript:void(0)"
+				onclick="editworkBook()"
+				class="easyui-linkbutton" iconCls="icon-edit" plain="true">修改</a> 
+			<a	id="workBookManager_delbtn" href="javascript:void(0)"
+				onclick="delworkBook()"
+				class="easyui-linkbutton" iconCls="icon-remove" plain="true">删除</a> 
+		    <a	id="workBookManager_savebtn" href="javascript:void(0)"
+				onclick="saveForm()" class="easyui-linkbutton"
+				iconCls="icon-save" plain="true">保存</a>
+			<a  id="workBookManager_canclebtn" href="javascript:void(0)"
+				onclick="cancleworkBook()"
+				class="easyui-linkbutton" iconCls="icon-cancel" plain="true">取消</a>
+		</div>
+	</div>
+	<!-- 主表信息 -->
+	<div data-options="region:'west',split:true"
+		style="width: 500px;">
+		<div class="easyui-layout" data-options="fit:true">		
+			<div data-options="region:'center'"> 		
+				<table id="dg" title="数据字典主表全部列表" class="easyui-datagrid" fitColumns="true" pagination="true" rownumbers="false" url="../inIBuyOrder/getAllInIBuyOrder.do" fit="true" singleSelect="true">
+			     	<thead>
+			     		<tr>			     			
+			     			<th field="inboId" width="50" align="center" data-options="sortable:true" hidden="hidden">采购订单id</th>
+							<!-- <th field="inboCode" width="50" align="center" data-options="sortable:true">订单码</th> -->
+							<th field="inboName" width="50" align="center" sortable="true">订单</th>
+							<th field="insiName" width="50" align="center" sortable="true" hidden="hidden">供应商</th>
+							<!-- <th field="insiName" width="50" align="center" sortable="true">供应商名称</th> -->
+							<th field="userName" width="50" align="center" sortable="true">下单人</th>
+							<!-- <th field="inboDate" width="50" align="center" sortable="true">下单时间</th> -->
+							<th field="inboTotalPrice" width="50" align="center" sortable="true">总价</th>
+							<!-- <th field="inboOfferprice" width="50" align="center" sortable="true">优惠价</th> -->
+							<!-- <th field="inboActualPrice" width="50" align="center" sortable="true">实价</th> -->
+							<th field="inboDeliveryDate" width="85" align="center" sortable="true">预计交货时间	</th>
+							
+							<th field="inboDeliveryAddress" width="50" align="center" sortable="true">交货地点</th>
+							<th field="inboState" width="50" align="center" sortable="true" data-options="formatter:function(value,row,index){
+																													if(value==5){
+																														return '未提交'
+																													}else{
+																														return '已提交'
+																													}
+																												}">完成状态</th>														
+							<th field="inboPayState" width="50" align="center" sortable="true" data-options="formatter:function(value,row,index){
+																													if(value==1){
+																														return '未付款'
+																													}else{
+																														return '已付款'
+																													}
+																												}">付款状态</th>
+							<!-- <th field="inboBillState" width="50" align="center" sortable="true">开票状态</th> -->
+							<!-- <th field="inboRemark" width="50" align="center" sortable="true">备注</th> -->
+							<!-- <th field="state" width="50" align="center" sortable="true">状态</th> -->
+							<th field="optName" width="50" align="center" sortable="true">操作人</th>
+							<!-- <th field="currDate" width="50" align="center" sortable="true">业务发生时间</th> -->
+						</tr>
+			   		</thead>
+			   	</table>
+			</div>	
+		</div>
+	</div>
+		
+		<div data-options="region:'center'" ">
+		<div id="tab_show" align="center" style="height:200px;background-color: #F7F7F7;margin-top:-16px" >
+			<h3 align="center">编辑框</h3>
+			<form id="workBookEditForm">
+				<input type="hidden" name="inboId" id="inboId" />
+				<table>
+					<tr>
+						<td><label>订单名称：</label></td>
+						<td><input class="easyui-validatebox" type="text"
+						id="inboName" name="inboName" data-options="required:true" maxlength="20" width="200px"/></td>
+						<td><label>交货地点：</label></td>
+						<td><input class="easyui-validatebox" type="text"
+						id="inboDeliveryAddress" name="inboDeliveryAddress" data-options="required:true" maxlength="20" width="200px"/></td>
+						<td><label>下单人姓名：</label></td>
+						<td><input class="easyui-validatebox" type="text"
+						id="userName" name="userName" data-options="required:true" maxlength="200" width="200px" height="400px" /></td>
+					</tr>
+					<tr>
+						<td><label>预交货时间:</label></td>
+							<td><input class="easyui-datebox" type="text" id="inboDeliveryDate" name="inboDeliveryDate" data-options="required:true" maxlength="20" width="200px"/></td>
+						<td><label>供货商：</label></td>
+						<td>
+						<input class="easyui-combobox" id="insiName" name="insiName" value="insiId" size="20" data-options="editable:false,panelHeight:'auto',valueField:'insiId',textField:'insiName',url:'../inSupplierInfo/getComboBox.do'"/>
+						</td>
+						<td><label>付款状态：</label></td>
+						<td>
+							<span class="radioSpan">
+			                <input type="radio" name="inboPayState" value="1">否</input>
+			                <input type="radio" name="inboPayState" value="0">是</input>
+            				</span>
+            			</td>
+					</tr>					
+					<tr>
+						<td><label>是否提交合同:</label></td>
+							<td>
+							<input  type="radio" id="inboState" name="inboState" value="5" />保存，不提交订单
+							<input  type="radio" id="inboState" name="inboState" value="6"/>直接提交订单
+							</td>
+						<td><label>订单编码</label></td>
+						<td><input class="easyui-validatebox" type="text"
+						id="inboCode" name="inboCode" data-options="required:true" maxlength="200" width="200px" height="400px" /></td>
+					</tr>
+				</table>
+			</form>
+		</div>
+		
+		<!-- 子表信息 -->
+		<div style="clear: both;"></div>
+		<div class="easyui-tabs" style="height: 500px;margin-top: -16px;">
+			<div title="数据字典子表信息列表" fit="true" data-options="border:true">
+				<table id="dgDetail" class="easyui-datagrid" fitColumns="true" rownumbers="true"  fit="true" toolbar="#tb" singleSelect="true" >
+			     	<thead>
+			     		<tr>
+							<th field="cb" checkbox="true" align="center"></th>
+							
+							<th field="inbodId" width="50" align="center" data-options="editor:{type:'validatebox',options:{disabled:false,required: true}}" hidden="hidden">订单明细id</th>
+							
+							<th field="inbaId" width="50" align="center" data-options="editor:{type:'validatebox',options:{disabled:false}}" hidden="hidden">采购申请id</th>	
+							<th field="inbaName" width="50" align="center" data-options="editor:{type:'validatebox',options:{disabled:false}}">采购申请</th>
+							
+							<th field="inbcId" width="50" align="center" data-options="editor:{type:'validatebox',options:{disabled:false}}" hidden="hidden" >合同id</th>							
+							<th field="inbcName" width="50" align="center" data-options="editor:{type:'validatebox',options:{disabled:false}}">合同</th>
+							<!-- <th field="inboName" width="50" align="center" data-options="editor:{type:'validatebox',options:{disabled:false}}">订单</th> -->
+							
+							<th field="insiId" width="50" align="center" data-options="editor:{type:'validatebox',options:{disabled:false}}" hidden="hidden">供应商id</th>
+							<th field="insiName" width="50" align="center" data-options="editor:{type:'validatebox',options:{disabled:false}}">供应商</th>
+							
+							<th field="ingiId" width="50" align="center" data-options="editor:{type:'validatebox',options:{disabled:false}}" hidden="hidden">商品id</th>
+							<th field="ingiName" width="50" align="center" data-options="editor:{type:'validatebox',options:{disabled:false}}">商品</th>
+							<th field="myPrice" width="50" align="center" data-options="editor:{type:'validatebox',options:{disabled:false}}">单价</th>
+							<th field="myCou" width="50" align="center" data-options="editor:{type:'validatebox',options:{disabled:false}}">数量</th>
+							<th field="myMoney" width="50" align="center" data-options="editor:{type:'validatebox',options:{disabled:false}}">总价</th>
+							<!-- <th field="taxPrice" width="50" align="center" data-options="editor:{type:'validatebox',options:{disabled:false}}">含税单价</th>
+							<th field="taxMoney" width="50" align="center" data-options="editor:{type:'validatebox',options:{disabled:false}}">含税金额</th> -->
+							<!-- <th field="invoicesMoney" width="50" align="center" data-options="editor:{type:'validatebox',options:{disabled:false}}">开票金额</th> -->
+							<th field="payMoney" width="50" align="center" data-options="editor:{type:'validatebox',options:{disabled:false}}">付款金额</th>
+							<!-- <th field="inbodRemark" width="50" align="center" data-options="editor:{type:'validatebox',options:{disabled:false}}">备注</th> -->
+							<!-- <th field="inbodState" width="50" align="center" data-options="editor:{type:'validatebox',options:{disabled:false}}">状态</th> -->
+							<th field="inbcdId" width="50" align="center" data-options="editor:{type:'validatebox',options:{
+								disabled:false,required: true}}" hidden="hidden">合同明细id</th>							
+						</tr>
+			   		</thead>
+			   	</table>
+				<div id="tb">
+					<div>
+						<a href="javascript:wbDetailManager()" class="easyui-linkbutton" iconCls="icon-add" plain="true" id="workBookDeatilAdd">添加</a>
+<!-- 						<a href="javascript:wbDetailModify()" class="easyui-linkbutton" iconCls="icon-edit" plain="true" id="workBookDeatilUpdate">修改</a> -->
+						<a href="javascript:wbDetailDelete()" class="easyui-linkbutton" iconCls="icon-remove" plain="true" id="workBookDeatilDel">删除</a>
+						<a href="javascript:saveWb_detail()" class="easyui-linkbutton" iconCls="icon-save" plain="true" id="workBookDeatilSav">保存</a>
+			      	</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	
+	<!-- form表单信息 -->
+	<div id="dlg3" class="easyui-dialog" style="width: 570px;height: 350px;padding: 10px 20px" closed="true" buttons="#dlg-buttons">
+	 <form id="workBookEditForm" method="post">	     
+		<table cellspacing="5px">
+			<p><input type="hidden" id="userId" name="userId" /></p>			
+			<tr><td>用户名：</td>
+			     <td><input type="text" id="userName" name="userName" class="easyui-validatebox" required="true" validType="isBlank"/></td>
+			     <td>&nbsp;&nbsp;&nbsp;&nbsp;</td><td>用户密码：</td>
+			     <td><input type="text" id="password" name="password" class="easyui-validatebox" required="true" validType="isBlank"/></td>
+			</tr>
+			<tr><td>角色名称：</td>
+				<td><input type="hidden" id="roleId" name="roleId"/>
+					<input type="text" id="roleName" name="roleName" class="easyui-validatebox" required="true" readonly="readonly" />
+				</td><td>&nbsp;&nbsp;&nbsp;&nbsp;</td>
+				<td colspan="2">
+					<a href="javascript:openRoleChooseDialog()" class="easyui-linkbutton">选择角色</a>
+				</td>
+			</tr>
+			<tr><td>备注：</td><td colspan="4">
+			    <textarea rows="7" cols="50" name="userDescription" id="userDescription"></textarea></td>
+			</tr>
+		</table>
+	 </form>	
+	</div>
+	
+	
+	<!-- 已签合同弹窗信息 -->
+				<div id="dlgBc" class="easyui-dialog" style="width: 700px;height: 350px;padding: 10px 20px" closed="true"  buttons="#dlg2-buttons">			
+			  <table id="dgBc" title="" class="easyui-datagrid" fitColumns="true" pagination="true" rownumbers="true" fit="true"
+				 url="../inBcManager/findAllBced.do">
+				<thead>
+					<tr>
+						<!-- 隐藏 -->
+						<th field="cb" checkbox="true" align="center"></th>
+						<th field="inbcdId" width="50" align="center" data-options="editor:{type:'validatebox',options:{
+								disabled:false,required: true}}" hidden="hidden">合同明细id</th>
+						<th field="inbaId" width="50" align="center" data-options="editor:{type:'validatebox',options:{
+								disabled:false,required: true}}" hidden="hidden">采购申请id</th>
+						<th field="inbadId" width="50" align="center" data-options="editor:{type:'validatebox',options:{
+								disabled:false,required: true}}" hidden="hidden">采购申请明细id</th>
+						<th field="inbcId" width="50" align="center" data-options="editor:{type:'validatebox',options:{
+								disabled:false,required: true}}" hidden="hidden">采购合同id</th>
+						<th field="insiId" width="50" align="center" data-options="editor:{type:'validatebox',options:{
+								disabled:false,required: true}}" hidden="hidden">供货商id</th>
+						<th field="ingiId" width="50" align="center" data-options="editor:{type:'validatebox',options:{
+								disabled:false,required: true}}" hidden="hidden">物品名称id</th>
+						<!-- 展示 -->									
+						<th field="inbaName" width="50" align="center" data-options="editor:{type:'validatebox',options:{disabled:false}}">采购申请</th>							
+						<th field="inbcName" width="50" align="center" data-options="editor:{type:'validatebox',options:{disabled:false}}">合同</th>
+						<th field="insiName" width="50" align="center" data-options="editor:{type:'validatebox',options:{disabled:false}}">供应商</th>
+						<th field="myCou" width="75" align="center" data-options="editor:{type:'validatebox',options:{
+									disabled:false}}">数量</th>							
+						<th field="myPrice" width="75" align="center" data-options="editor:{type:'validatebox',options:{
+									disabled:false}}">单价</th>
+						<th field="ingiName" width="75" align="center" data-options="editor:{type:'validatebox',options:{
+									disabled:false}}">物品名称</th>
+						<th field="myMoney" width="75" align="center" data-options="editor:{type:'validatebox'}">总价</th>
+						<th field="invoicesMoney" width="75" align="center" data-options="editor:{type:'validatebox',options:{
+									disabled:false}}">开票金额</th>
+						<th field="payMoney" width="75" align="center" data-options="editor:{type:'validatebox',options:{
+									disabled:false}}">付款金额</th>
+
+					</tr>
+				</thead>
+			 </table>			
+		 </div>
+		 <!-- 弹窗按钮 -->
+		  <div id="dlg2-buttons">
+	      <a  onclick="saveBcManager()" class="easyui-linkbutton" iconCls="icon-ok">保存</a>
+	      <a  onclick="closeBcManagerAddDialog()" class="easyui-linkbutton" iconCls="icon-cancel">关闭</a>
+	     </div>
+</div>
+</body>
+</html>

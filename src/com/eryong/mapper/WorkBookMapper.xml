@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.eryong.dao.WorkBookDao">
+  <resultMap type="WorkBook" id="WorkBookReslut">
+  		<id property="wBId" column="wBId"/>
+  		<result property="wBName" column="wBName"/>
+  		<result property="wBDelFlag" column="wBDelFlag"/>
+  		<result property="wBRemark" column="wBRemark"/>
+  		<result property="currentTime" column="currentTime"/>
+  		<result property="optId" column="optId"/>  		
+  		<result property="wBState" column="wBState"/>
+  		<collection property="workBookDetail" column="wBId" ofType="WorkBookDetail"
+  		select="com.eryong.dao.WorkBookDetailDao.getWorkBookDetailByWBId"></collection>  		
+  </resultMap>
+  <!-- 查询数据字典  -->
+  <select id="findAllworkBook"  resultMap="WorkBookReslut" parameterType="PageBean">    
+   	SELECT
+   	 wBId,
+   	 wBName,
+   	 wBDelFlag,
+   	 wBRemark,
+   	 currentTime,
+   	 optId,
+   	 wBState   	  
+   	FROM 
+   	 t_erp_workbook 
+   	WHERE 
+	 wBDelFlag=0
+	order by currentTime desc
+	limit #{start},#{rows}
+  </select>
+  <insert id="addWorkBook" parameterType="WorkBook">
+  	insert into
+  	 t_erp_workbook
+  	  (wBName,
+   	  wBDelFlag,
+   	  wBRemark,
+   	  currentTime,
+   	  optId,
+   	  wBState   	  
+  	 )
+  	 values
+  	 (#{wBName},
+   	  0,
+   	  #{wBRemark},
+   	  #{currentTime},
+   	  #{optId},
+   	  0   	  
+  	 )
+  
+  </insert>
+  
+  <select id="getMaxWBId" resultType="Integer">
+  	SELECT MAX(wBId) FROM t_erp_workbook
+  </select>
+  
+  <!-- 修改子表前查询 -->
+  <select id="updateSelectWorkBook"  resultMap="WorkBookReslut" parameterType="Integer">    
+   	SELECT
+   	 wBId,
+   	 wBName,
+   	 wBDelFlag,
+   	 wBRemark,
+   	 currentTime,
+   	 optId,
+   	 wBState   	  
+   	FROM 
+   	 t_erp_workbook 
+   	WHERE 
+	 wBDelFlag=0
+	and
+	 wBId=#{wBId}	
+  </select>
+  
+  <!-- 修改主表信息 -->
+  <update id="updateWorkBookById"  parameterType="WorkBook">
+  	update
+  		t_erp_workbook
+  	set
+  		wBName=#{wBName},   	 	
+   	 	wBRemark=#{wBRemark}
+    where
+    	wBId=#{wBId}
+  </update>
+  
+  <update id="deleteWorkBookById"  parameterType="Integer">
+  	update
+  		t_erp_workbook
+  	set
+  		wBDelFlag=1
+  	where
+  		wBId=#{wBId}  
+  </update>
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+</mapper>

@@ -1,0 +1,183 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.eryong.dao.InIBuyOrderDao">
+  
+ <resultMap type="InIBuyOrder" id="InIBuyOrderResult">
+ 	<id property="inboId" column="inboId" />
+ 	<result property="inboCode" column="inboCode"/>
+ 	<result property="inboName" column="inboName"/>
+ 	<result property="insiName" column="insiName"/>
+ 	<result property="userName" column="userName"/>
+ 	<result property="inboDate" column="inboDate"/>
+ 	<result property="inboTotalPrice" column="inboTotalPrice"/>
+ 	<result property="inboOfferprice" column="inboOfferprice"/>
+ 	<result property="inboActualPrice" column="inboActualPrice"/>
+ 	<result property="inboDeliveryDate" column="inboDeliveryDate"/>
+ 	<result property="inboDeliveryAddress" column="inboDeliveryAddress"/>
+ 	<result property="inboState" column="inboState"/>
+ 	<result property="inboPayState" column="inboPayState"/>
+ 	<result property="inboBillState" column="inboBillState"/>
+ 	<result property="inboRemark" column="inboRemark"/>
+ 	<result property="state" column="state"/>
+ 	<result property="optName" column="optName"/>
+ 	<collection property="inBuyOrderDetail" column="inboId" ofType="InBuyOrderDetail" select="com.eryong.dao.InBuyOrderDetailDao.getAllInBuyOrderDetail"></collection>
+ </resultMap>
+ 	<!-- 获取主系表全部信息 -->
+ 	<select id="getAllInIBuyOrder" parameterType="Map" resultMap="InIBuyOrderResult">
+ 			SELECT
+ 			ibo.inboId,
+ 			ibo.inboCode,
+ 			ibo.inboName,
+ 			isp.insiName, 			
+ 			ibo.userName,
+ 			ibo.inboDate,
+ 			ibo.inboTotalPrice,
+ 			ibo.inboOfferprice,
+ 			ibo.inboActualPrice,
+ 			ibo.inboDeliveryDate,
+ 			ibo.inboDeliveryAddress,
+ 			ibo.inboState,
+ 			ibo.inboPayState,
+ 			ibo.inboBillState,
+ 			ibo.inboRemark,
+ 			ibo.state,
+ 			ui.userName optName,
+ 			ibo.currDate
+ 		FROM
+ 			t_erp_inbuyorder ibo
+ 		LEFT JOIN
+ 			t_erp_insupplierinfo isp
+			
+		ON
+ 			isp.insiId = ibo.insiId
+ 		LEFT JOIN
+			t_erp_user ui
+		ON
+ 			ui.userId = ibo.optId
+
+ 		
+ 		WHERE
+ 			ibo.inboDelflag = 0
+ 		<if test="inIBuyOrder.inboName != null">
+ 			and ibo.inboName like concat('%',#{inIBuyOrder.inboName},'%')
+ 		</if>
+ 		order by ibo.currDate desc
+ 		limit #{pageBean.start},#{pageBean.rows}
+ 	</select>
+
+ 	<!-- 获取主表条数条数 -->
+ 	<select id="getOrderCount" parameterType="Map" resultType="Integer">
+ 		select
+ 			count(0)
+ 		from
+ 			t_erp_inbuyorder
+ 		where
+ 			inboDelflag = 0
+ 		<if test="inIBuyOrder.inboName != null">
+ 			and inboName like concat('%',#{inIBuyOrder.inboName},'%') 			
+ 		</if>
+ 	</select>
+ 
+ 	<!-- 获取所有订单主表 -->
+ 	<select id="getAllOrder" parameterType="Map" resultType="InIBuyOrder">
+ 		SELECT
+ 			ibo.inboId,
+ 			ibo.inboCode,
+ 			ibo.inboName,
+ 			isp.insiName,
+ 			ibo.userName,
+ 			ibo.inboDate,
+ 			ibo.inboTotalPrice,
+ 			ibo.inboOfferprice,
+ 			ibo.inboActualPrice,
+ 			ibo.inboDeliveryDate,
+ 			ibo.inboDeliveryAddress,
+ 			ibo.inboState,
+ 			ibo.inboPayState,
+ 			ibo.inboBillState,
+ 			ibo.inboRemark,
+ 			ibo.state,
+ 			ui.userName optName,
+ 			ibo.currDate
+ 		FROM
+ 			t_erp_inbuyorder ibo
+ 		LEFT JOIN
+ 			t_erp_insupplierinfo isp
+			
+		ON
+ 			isp.insiId = ibo.insiId
+ 		LEFT JOIN
+			t_erp_user ui
+		ON
+ 			ui.userId = ibo.optId
+ 		where
+ 			ibo.inboDelflag = 0
+ 		<if test="inIBuyOrder.inboName != null">
+ 			and ibo.inboName like concat('%',#{inIBuyOrder.inboName},'%')
+ 		</if>
+ 		order by ibo.currDate desc
+ 		limit #{pageBean.start},#{pageBean.rows}
+ 	</select>
+ 	
+ 	<!-- 添加订单 -->
+ 		<insert id="addAllOrder" parameterType="InIBuyOrder">
+ 			insert into 
+ 				t_erp_inbuyorder
+ 				(
+ 			inboCode,
+ 			inboName, 			
+ 			userName,
+ 			inboDate,
+ 			inboTotalPrice,
+ 			inboOfferprice,
+ 			inboActualPrice,
+ 			inboDeliveryDate,
+ 			inboDeliveryAddress,
+ 			inboState,
+ 			inboPayState,
+ 			inboBillState,
+ 			inboRemark,
+ 			state,
+ 			currDate,
+ 			inboDelflag,
+ 			optId,
+ 			insiId
+ 				)				
+ 			values
+ 			(#{inboCode},
+ 			#{inboName}, 			
+ 			#{userName},
+ 			#{inboDate},
+ 			#{inboTotalPrice},
+ 			#{inboOfferprice},
+ 			#{inboActualPrice},
+ 			#{inboDeliveryDate},
+ 			#{inboDeliveryAddress},
+ 			#{inboState},
+ 			#{inboPayState},
+ 			#{inboBillState},
+ 			#{inboRemark},
+ 			#{state},
+ 			#{currDate},
+ 			0,
+ 			#{optId},
+ 			#{insiId}
+ 			)
+ 		
+ 		
+ 		</insert>
+ 	
+ 	<!-- 获取最大id -->
+ 	
+ 	<select id="getMaxOrderId" resultType="Integer">
+ 	
+ 		select Max(inboId) from t_erp_inbuyorder where inboDelflag = 0
+    </select>
+    
+    <!-- 根据id删除主表 -->
+    <update id="deleteOrder" parameterType="Integer">
+        update t_erp_inbuyorder set inboDelflag = 1 where inboId=#{inboId}
+    </update>
+ 	
+ 
+</mapper>

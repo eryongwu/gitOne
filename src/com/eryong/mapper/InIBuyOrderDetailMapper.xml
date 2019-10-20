@@ -1,0 +1,246 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.eryong.dao.InBuyOrderDetailDao">
+   
+ 	<select id="getAllInBuyOrderDetail" parameterType="Integer" resultType="InBuyOrderDetail">
+ 		SELECT
+ 			ibod.inbodId,
+ 			ibod.inbaId,
+ 			ibod.inbcdId,
+ 			iba.inbaName,
+ 			ibod.inbcId,
+ 			ibc.inbcName,
+ 			ibo.inboName,
+ 			ibod.insiId,
+ 			isp.insiName, 			 			
+ 			igi.ingiName,
+ 			ibod.myPrice,
+ 			ibod.myCou,
+ 			ibod.myMoney,
+ 			ibod.taxPrice,
+ 			ibod.taxMoney,
+ 			ibod.invoicesMoney,
+ 			ibod.payMoney,
+ 			ibod.inbodRemark,
+ 			ibod.inbodState			 			
+ 		FROM
+ 			t_erp_inbuyorderdetail ibod
+ 		LEFT JOIN
+ 			t_erp_inbuyapply iba			
+		ON
+ 			ibod.inbaId = iba.inbaId
+ 		LEFT JOIN
+			t_erp_inbuycontract ibc
+		ON
+ 			ibod.inbcId = ibc.inbcId
+ 		LEFT JOIN
+ 			t_erp_inbuyorder ibo
+ 		ON
+ 			ibod.inbodId = ibo.inboId
+ 		LEFT JOIN
+ 			t_erp_insupplierinfo isp
+ 		ON 
+ 			ibod.insiId = isp.insiId
+ 		LEFT JOIN 
+ 			t_erp_ingoodsinfo igi
+ 		ON 
+ 			ibod.ingiId = igi.ingiId 			
+ 		WHERE
+ 			ibod.inmbodDelflag = 0
+ 		AND 
+ 			ibod.inboId = #{inboId}	
+ 			
+ 	</select>
+ 
+ 	<!-- 获取订单详情信息 -->
+ 	
+ 	<select id="getAllOrderDetial" parameterType="Map" resultType="InBuyOrderDetail">
+ 		SELECT
+ 			ibod.inbodId,
+ 			iba.inbaName,
+ 			ibc.inbcName,
+ 			ibo.inboName,
+ 			ibod.insiId,
+ 			isp.insiName, 			 			
+ 			igi.ingiName,
+ 			ibod.myPrice,
+ 			ibod.myCou,
+ 			ibod.myMoney,
+ 			ibod.taxPrice,
+ 			ibod.taxMoney,
+ 			ibod.invoicesMoney,
+ 			ibod.payMoney,
+ 			ibod.inbodRemark,
+ 			ibod.inbodState			 			
+ 		FROM
+ 			t_erp_inbuyorderdetail ibod
+ 		LEFT JOIN
+ 			t_erp_inbuyapply iba			
+		ON
+ 			ibod.inbaId = iba.inbaId
+ 		LEFT JOIN
+			t_erp_inbuycontract ibc
+		ON
+ 			ibod.inbcId = ibc.inbcId
+ 		LEFT JOIN
+ 			t_erp_inbuyorder ibo
+ 		ON
+ 			ibod.inbodId = ibo.inboId
+ 		LEFT JOIN
+ 			t_erp_insupplierinfo isp
+ 		ON 
+ 			ibod.insiId = isp.insiId
+ 		LEFT JOIN 
+ 			t_erp_ingoodsinfo igi
+ 		ON 
+ 			ibod.ingiId = igi.ingiId 			
+ 		WHERE
+ 			ibod.inmbodDelflag = 0
+ 		AND 
+ 			ibod.inboId = #{inBuyOrderDetail.inboId}	
+<!--  	<if test="inBuyOrderDetail.inboName != null">
+ 			and ibo.inboName like concat('%',#{inIBuyOrder.inboName},'%')
+ 		</if> -->
+ 		order by ibo.currDate desc
+ 		limit #{pageBean.start},#{pageBean.rows}
+ 			
+ 	</select>
+ 	
+ 	<!-- 订单详情条数 -->
+ 	<select id="getAllOrderDetialCount" parameterType="Map" resultType="Integer" >
+ 		select
+ 			count(0)
+ 		from 
+ 			t_erp_inbuyorderdetail
+ 		where
+ 			inmbodDelflag = 0
+ 		AND 
+ 			inboId = #{inBuyOrderDetail.inboId}
+ 	</select> 
+ 	
+ 	<!-- 细表添加数据 -->
+ 	
+ 	<insert id="addInBuyOrderDetail" parameterType="InBuyOrderDetail">
+ 	
+ 	insert into
+ 		t_erp_inbuyorderdetail
+ 		(
+ 			inbaId,
+ 			inbadId,
+ 			inbcId,
+ 			inbcdId,
+ 			inboId,
+ 			insiId, 			 			 			
+ 			ingiId,
+ 			myPrice,
+ 			myCou,
+ 			myMoney,
+ 			taxPrice,
+ 			taxMoney,
+ 			invoicesMoney,
+ 			payMoney,
+ 			inbodRemark,
+ 			inbodState,
+ 			inmbodDelflag	 		
+ 		)values
+ 		(   #{inbaId},
+ 			#{inbadId},
+ 			#{inbcId},
+ 			#{inbcdId},
+ 			#{inboId},
+ 			#{insiId}, 			 			 			
+ 			#{ingiId},
+ 			#{myPrice},
+ 			#{myCou},
+ 			#{myMoney},
+ 			#{taxPrice},
+ 			#{taxMoney},
+ 			#{invoicesMoney},
+ 			#{payMoney},
+ 			#{inbodRemark},
+ 			#{inbodState},
+ 			0	 	
+ 		)
+ 	</insert>
+ 	
+ 	<!-- 根据主表id获取所有子表信息 -->
+ 	<select id="getAllOrderDetailByInboId" parameterType="Integer" resultType="InBuyOrderDetail">	
+ 		 SELECT
+ 			ibod.inbodId,
+ 			ibod.inboId,
+ 			ibod.inbcdId,
+ 			ibod.inbaId,
+ 			iba.inbaName,
+ 			ibod.inbcId,
+ 			ibc.inbcName,
+ 			ibo.inboName,
+ 			ibod.insiId,
+ 			isp.insiName, 			 			
+ 			igi.ingiName,
+ 			ibod.myPrice,
+ 			ibod.myCou,
+ 			ibod.myMoney,
+ 			ibod.taxPrice,
+ 			ibod.taxMoney,
+ 			ibod.invoicesMoney,
+ 			ibod.payMoney,
+ 			ibod.inbodRemark,
+ 			ibod.inbodState			 			
+ 		FROM
+ 			t_erp_inbuyorderdetail ibod
+ 		LEFT JOIN
+ 			t_erp_inbuyapply iba			
+		ON
+ 			ibod.inbaId = iba.inbaId
+ 		LEFT JOIN
+			t_erp_inbuycontract ibc
+		ON
+ 			ibod.inbcId = ibc.inbcId
+ 		LEFT JOIN
+ 			t_erp_inbuyorder ibo
+ 		ON
+ 			ibod.inbodId = ibo.inboId
+ 		LEFT JOIN
+ 			t_erp_insupplierinfo isp
+ 		ON 
+ 			ibod.insiId = isp.insiId
+ 		LEFT JOIN 
+ 			t_erp_ingoodsinfo igi
+ 		ON 
+ 			ibod.ingiId = igi.ingiId 			
+ 		WHERE
+ 			ibod.inmbodDelflag = 0
+ 		AND 
+ 			ibod.inboId = #{inboId}	
+ 			
+ 	</select>
+ 	
+ 	<!-- 根据主表id删除子表 -->
+ 	
+ 	<update id="deleteOrderDetailByInboId" parameterType="Integer">
+ 		update t_erp_inbuyorderdetail set inmbodDelflag = 1 where inboId = #{inboId}		
+ 	</update>
+ 	
+ 	<!-- 根据子表id删除子表 -->
+ 	<update id="deleteOrderDetailByInbodId" parameterType="Integer">
+ 		update t_erp_inbuyorderdetail set inmbodDelflag = 1 where inbodId = #{inbodId}
+ 	</update>
+ 	
+ 	
+ 	
+ 	
+ 	
+ 	
+ 	
+ 	
+ 	
+ 	
+ 	
+ 	
+ 	
+ 	
+ 	
+ 	
+ 	
+ 	
+</mapper>
