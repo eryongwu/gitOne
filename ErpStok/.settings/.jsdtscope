@@ -8,5 +8,10 @@
 		</attributes>
 	</classpathentry>
 	<classpathentry kind="con" path="org.eclipse.wst.jsdt.launching.baseBrowserLibrary/StandardBrowser/html5"/>
+<<<<<<< HEAD
 	<classpathentry kind="output" path=""/>444
 </classpath>
+=======
+	<classpathentry kind="output" path=""/>
+</classpath>222222222222
+>>>>>>> 4f00360d00138e3782c96f9297d82bd41a33afeb
