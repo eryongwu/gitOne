@@ -1,13 +1,13 @@
-/**@文件名: RoleInfoController.java
- * @类功能说明: 
- * @作者: Wueryong
+/**@鏂囦欢鍚�: RoleInfoController.java
+ * @绫诲姛鑳借鏄�: 
+ * @浣滆��: Wueryong
  * @Email: 738841484@qq.com
- * @日期: 2019年6月17日下午5:35:36
- * @修改说明:<br> 
+ * @鏃ユ湡: 2019骞�6鏈�17鏃ヤ笅鍗�5:35:36
+ * @淇敼璇存槑:<br> 
  * <pre>
- * 	 <li>作者: Wueryong</li> 
- * 	 <li>日期: 2019年6月17日下午5:35:36</li> 
- *	 <li>内容: </li>
+ * 	 <li>浣滆��: Wueryong</li> 
+ * 	 <li>鏃ユ湡: 2019骞�6鏈�17鏃ヤ笅鍗�5:35:36</li> 
+ *	 <li>鍐呭: </li>
  * </pre>
  */
 package com.eryong.controller;
@@ -15,12 +15,13 @@ package com.eryong.controller;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.json.JsonObject;
+
+import net.sf.json.JSONObject;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import net.sf.json.JSONArray;
-import net.sf.json.JSONObject;
+
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -33,16 +34,16 @@ import com.eryong.domain.UserInfo;
 import com.eryong.service.RoleInfoService;
 import com.eryong.util.ResponseUtil;
 
-/**@文件名: RoleInfoController.java
- * @类功能说明: 
- * @作者: Wueryong
+/**@鏂囦欢鍚�: RoleInfoController.java
+ * @绫诲姛鑳借鏄�: 
+ * @浣滆��: Wueryong
  * @Email: 738841484@qq.com
- * @日期: 2019年6月17日下午5:35:36
- * @修改说明:<br> 
+ * @鏃ユ湡: 2019骞�6鏈�17鏃ヤ笅鍗�5:35:36
+ * @淇敼璇存槑:<br> 
  * <pre>
- * 	 <li>作者: Wueryong</li> 
- * 	 <li>日期: 2019年6月17日下午5:35:36</li> 
- *	 <li>内容: </li>
+ * 	 <li>浣滆��: Wueryong</li> 
+ * 	 <li>鏃ユ湡: 2019骞�6鏈�17鏃ヤ笅鍗�5:35:36</li> 
+ *	 <li>鍐呭: </li>
  * </pre>
  */
 /**
@@ -57,11 +58,11 @@ public class RoleInfoController {
 	private RoleInfoService roleInfoService;
 
 	/**
-	 * @方法名: getAllRoleInfo
-	 * @方法说明: 用户管理列表下拉框角色展示
-	 * @作者: Wueryong
-	 * @邮箱：738841484@qq.com
-	 * @日期: 2019年6月18日下午10:56:35
+	 * @鏂规硶鍚�: getAllRoleInfo
+	 * @鏂规硶璇存槑: 鐢ㄦ埛绠＄悊鍒楄〃涓嬫媺妗嗚鑹插睍绀�
+	 * @浣滆��: Wueryong
+	 * @閭锛�738841484@qq.com
+	 * @鏃ユ湡: 2019骞�6鏈�18鏃ヤ笅鍗�10:56:35
 	 * @param res
 	 * @throws Exception
 	 * @return: void
@@ -69,16 +70,16 @@ public class RoleInfoController {
 	@RequestMapping("/roleComboxList")
 	public void roleComboxList(HttpServletResponse res) throws Exception {
 
-		JSONArray arrayRoleInfo = roleInfoService.roleComboxList();// 查询所有角色信息
+		JSONArray arrayRoleInfo = roleInfoService.roleComboxList();// 鏌ヨ鎵�鏈夎鑹蹭俊鎭�
 		ResponseUtil.write(res, arrayRoleInfo);
 	}
 
 	/**
-	 * @方法名: findAllRole
-	 * @方法说明: 用户添加角色详情列表展示
-	 * @作者: Wueryong
-	 * @邮箱：738841484@qq.com
-	 * @日期: 2019年6月18日下午10:57:23
+	 * @鏂规硶鍚�: findAllRole
+	 * @鏂规硶璇存槑: 鐢ㄦ埛娣诲姞瑙掕壊璇︽儏鍒楄〃灞曠ず
+	 * @浣滆��: Wueryong
+	 * @閭锛�738841484@qq.com
+	 * @鏃ユ湡: 2019骞�6鏈�18鏃ヤ笅鍗�10:57:23
 	 * @param res
 	 * @param s_roleName
 	 * @param pageBean
@@ -102,18 +103,18 @@ public class RoleInfoController {
 		JSONObject json = new JSONObject();
 		int total = roleInfoService.getRoleInfoCount(s_roleName);
 		
-		JSONArray arrayRoleInfo = roleInfoService.getAllRoleInfo(map);// 查询所有角色信息
+		JSONArray arrayRoleInfo = roleInfoService.getAllRoleInfo(map);// 鏌ヨ鎵�鏈夎鑹蹭俊鎭�
 		json.put("total", total);
 		json.put("rows", arrayRoleInfo);		
 		ResponseUtil.write(res, json);
 	}
 	
 	/**
-	 * @方法名: addRoleInfo
-	 * @方法说明: 添加角色
-	 * @作者: Wueryong
-	 * @邮箱：738841484@qq.com
-	 * @日期: 2019年6月24日下午3:34:59
+	 * @鏂规硶鍚�: addRoleInfo
+	 * @鏂规硶璇存槑: 娣诲姞瑙掕壊
+	 * @浣滆��: Wueryong
+	 * @閭锛�738841484@qq.com
+	 * @鏃ユ湡: 2019骞�6鏈�24鏃ヤ笅鍗�3:34:59
 	 * @param res
 	 * @param roleNameVild
 	 * @param roleInfo
@@ -147,11 +148,11 @@ public class RoleInfoController {
 	}
 
 	/**
-	 * @方法名: updateRoleInfo
-	 * @方法说明: 修改角色
-	 * @作者: Wueryong
-	 * @邮箱：738841484@qq.com
-	 * @日期: 2019年6月20日下午3:20:15
+	 * @鏂规硶鍚�: updateRoleInfo
+	 * @鏂规硶璇存槑: 淇敼瑙掕壊
+	 * @浣滆��: Wueryong
+	 * @閭锛�738841484@qq.com
+	 * @鏃ユ湡: 2019骞�6鏈�20鏃ヤ笅鍗�3:20:15
 	 * @param roleInfo
 	 * @param resp
 	 * @throws Exception
@@ -167,11 +168,11 @@ public class RoleInfoController {
 		ResponseUtil.write(resp, json);
 	}
 	/**
-	 * @方法名: deleteRoleInfo
-	 * @方法说明: 删除角色
-	 * @作者: Wueryong
-	 * @邮箱：738841484@qq.com
-	 * @日期: 2019年6月20日下午3:32:00
+	 * @鏂规硶鍚�: deleteRoleInfo
+	 * @鏂规硶璇存槑: 鍒犻櫎瑙掕壊
+	 * @浣滆��: Wueryong
+	 * @閭锛�738841484@qq.com
+	 * @鏃ユ湡: 2019骞�6鏈�20鏃ヤ笅鍗�3:32:00
 	 * @param str
 	 * @param resp
 	 * @throws Exception
